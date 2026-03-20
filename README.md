@@ -18,26 +18,52 @@ AEGIS (**A**utonomous **E**nhanced **G**roup **I**ntelligence **S**ystem) is a p
 
 ---
 
+## :wrench: Prerequisites
+
+```bash
+# 1. Node.js + npm (required for Claude Code)
+brew install node
+node --version     # v18+ required
+npm --version
+
+# 2. Claude Code CLI
+npm install -g @anthropic-ai/claude-code
+claude --version   # Should show: Claude Code vX.X.X
+
+# 3. Git
+git --version
+
+# 4. tmux (optional — for Agent Teams with visible panes)
+brew install tmux
+```
+
+> :bulb: **Tip:** If `claude` or `node` not found after install, open a **new terminal tab** — your PATH needs to reload.
+
+---
+
 ## :rocket: Quick Start
 
 ```bash
-# Clone the repository
-git clone https://github.com/phariyawitjiap-aeternix/AEGIS-Team.git
-cd AEGIS-Team
+# Step 1: Clone AEGIS framework (one-time only)
+git clone https://github.com/phariyawitjiap-aeternix/AEGIS-Team.git ~/AEGIS-Team
 
-# Make installer executable
-chmod +x install.sh
+# Step 2: Create your project
+mkdir ~/my-project && cd ~/my-project
+git init
 
-# Install with your preferred profile
-./install.sh --profile standard --project-name "My Project"
+# Step 3: Install AEGIS into your project
+~/AEGIS-Team/install.sh --profile standard --project-name "My Project"
 
-# Start your first session
-/aegis-start
+# Step 4: Open Claude Code
+claude
+
+# Step 5: Inside Claude Code, type your first command:
+> /aegis-start
 ```
 
 **Profile options:** `minimal` (7 skills) · `standard` (13 skills) · `full` (21 skills)
 
-> :book: **[Full Getting Started Guide →](GETTING_STARTED.md)** — step-by-step terminal instructions with screenshots
+> :book: **[Full Getting Started Guide →](GETTING_STARTED.md)** — step-by-step terminal instructions with troubleshooting
 
 ---
 
