@@ -173,6 +173,206 @@ You:    ส่งต่อ
 
 ---
 
+### :iphone: Full Walkthrough: Building an iOS App with AEGIS
+
+> สร้าง iOS Todo App ตั้งแต่ศูนย์ ด้วย AEGIS + Claude Code
+
+**Terminal — Setup:**
+
+```bash
+# Create iOS project
+mkdir ~/TodoApp && cd ~/TodoApp
+git init
+
+# Install AEGIS
+~/AEGIS-Team/install.sh --profile full --project-name "TodoApp iOS"
+
+# Open Claude Code
+claude
+```
+
+**Session 1 — Spec & Architecture:**
+
+```
+You:     /aegis-start
+
+🧭 Navi: ╔═══════════════════════════════════════════════╗
+         ║ 🛡️ AEGIS — TodoApp iOS                        ║
+         ║ Context: 🟢 8% | Autonomy: L1 | Profile: full ║
+         ╚═══════════════════════════════════════════════╝
+
+You:     เขียน spec สำหรับ iOS Todo App
+         - SwiftUI + MVVM
+         - CoreData สำหรับ offline storage
+         - CloudKit sync
+         - Widget extension
+         - Dark mode support
+
+📐 Sage: Writing spec...
+         ┌─────────────────────────────────────────────┐
+         │ BRD: Todo App — personal task management     │
+         │ SRS: SwiftUI + MVVM + CoreData + CloudKit    │
+         │ UX:  5 screens (list, detail, add, settings, │
+         │      widget config)                          │
+         │ → _aegis-output/specs/todoapp-srs.md         │
+         └─────────────────────────────────────────────┘
+
+You:     ถกเถียง — CoreData vs SwiftData vs Realm
+
+🧭 Navi: Spawning debate team...
+
+📐 Sage: "SwiftData — native, modern, less boilerplate"
+⚡ Bolt: "SwiftData needs iOS 17+, CoreData supports iOS 15+"
+🔴 Havoc: "SwiftData has migration bugs in iOS 17.0-17.2.
+           What about users on older devices?"
+📐 Sage: "Target iOS 17+ only — 85% adoption rate"
+🔴 Havoc: "CloudKit sync with SwiftData is still fragile.
+           CoreData + NSPersistentCloudKitContainer is proven."
+🧭 Navi: Decision: CoreData + CloudKit (proven stability)
+         SwiftData migration planned for v2.0
+         → Saved to _aegis-brain/resonance/architecture-decisions.md
+
+You:     จบ session
+
+🧭 Navi: 📓 Diary: "First session — spec and architecture decisions..."
+         🎓 Lessons: SwiftData not ready for CloudKit sync yet
+         📋 Handoff: Next → implement data model + core UI
+```
+
+**Session 2 — Build Core Features:**
+
+```
+You:     /aegis-start
+
+🧭 Navi: ╔═══════════════════════════════════════════════╗
+         ║ 📌 PENDING from Session 1:                    ║
+         ║  • Implement CoreData model                   ║
+         ║  • Build core UI (list + detail screens)      ║
+         ║  • Set up CloudKit container                  ║
+         ╚═══════════════════════════════════════════════╝
+
+You:     ทีมสร้าง — implement data model และ core UI
+
+┌─── tmux: aegis-build ──────────────────────────────────┐
+│ ┌─ 📐 Sage ──────────────┐ ┌─ ⚡ Bolt ───────────────┐ │
+│ │ Spec: CoreData model   │ │ Creating files...       │ │
+│ │ • TodoItem entity      │ │ • TodoItem.swift        │ │
+│ │ • Category entity      │ │ • Persistence.swift     │ │
+│ │ • 1-to-many relation   │ │ • TodoListView.swift    │ │
+│ │ → PlanProposal sent    │ │ • TodoDetailView.swift  │ │
+│ │                        │ │ • AddTodoView.swift     │ │
+│ │                        │ │ • TodoViewModel.swift   │ │
+│ │                        │ │ → 7 files created       │ │
+│ └────────────────────────┘ └─────────────────────────┘ │
+│ ┌─ 🛡️ Vigil ──────────────────────────────────────────┐│
+│ │ Review:                                              ││
+│ │ ✅ Correctness — MVVM pattern correct                ││
+│ │ ✅ Security — no hardcoded keys                      ││
+│ │ 🟡 Maintainability — ViewModel needs protocol        ││
+│ │ 🔵 Suggestion — add Previews for SwiftUI views       ││
+│ │ → QualityGate: ✅ PASS (0 critical)                  ││
+│ └──────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────┘
+
+You:     เพิ่ม CloudKit sync
+
+⚡ Bolt: Adding NSPersistentCloudKitContainer...
+         • Updated Persistence.swift (CloudKit container)
+         • Created CloudKitSync.swift (sync monitor)
+         • Updated Info.plist (CloudKit entitlements)
+         → 2 files created, 2 modified
+
+You:     ตรวจความปลอดภัย
+
+🔧 Forge: Scanning...
+🛡️ Vigil: Security audit:
+          ✅ No hardcoded API keys
+          ✅ CloudKit uses system auth (no custom tokens)
+          🟡 Add App Transport Security exceptions review
+          🔵 Consider adding biometric lock for sensitive todos
+          Gate: ✅ PASS
+
+You:     จบ session
+
+🧭 Navi: 📋 Handoff: Next → Widget extension + dark mode + tests
+```
+
+**Session 3 — Polish & Ship:**
+
+```
+You:     /aegis-start
+
+🧭 Navi: 📌 PENDING: Widget extension, dark mode, tests
+
+You:     ทีมสร้าง — Widget extension สำหรับ iOS
+
+📐 Sage: Spec: WidgetKit timeline provider + 3 widget sizes
+⚡ Bolt: Creating TodoWidget target...
+         • TodoWidgetBundle.swift
+         • TodoTimelineProvider.swift
+         • TodoWidgetEntryView.swift (small/medium/large)
+         • Shared AppGroup for CoreData access
+🛡️ Vigil: ✅ PASS — widget reads from shared container correctly
+
+You:     ทีมรีวิว — review ทั้ง project ก่อน submit App Store
+
+┌─── tmux: aegis-review ─────────────────────────────────┐
+│ ┌─ 🔧 Forge ─────────────┐ ┌─ 🔴 Havoc ─────────────┐ │
+│ │ Scanning full project   │ │ Stress testing...       │ │
+│ │ • 23 Swift files        │ │ • Empty state? ✅       │ │
+│ │ • 2 targets (app+widget)│ │ • 1000+ items? 🟡 slow  │ │
+│ │ • 0 TODO markers left   │ │ • No network? ✅ offline│ │
+│ │ • Test coverage: 72%    │ │ • Delete all? ✅ works  │ │
+│ └─────────────────────────┘ └─────────────────────────┘ │
+│ ┌─ 🛡️ Vigil (Lead) ───────────────────────────────────┐│
+│ │ Final Review:                                        ││
+│ │ 🔴 Critical: 0                                       ││
+│ │ 🟡 Warning:  1 (pagination needed for 1000+ items)   ││
+│ │ 🔵 Suggest:  3 (accessibility labels, haptic, icon)  ││
+│ │                                                      ││
+│ │ → QualityGate: ✅ CONDITIONAL (fix pagination)       ││
+│ └──────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────┘
+
+You:     /aegis-launch
+
+🧭 Navi: Launch Readiness Check:
+         ✅ All tests pass (72% coverage)
+         ✅ No critical findings
+         🟡 1 warning: pagination for large lists
+         ✅ README up to date
+         ✅ App Store screenshots ready
+         ✅ Privacy policy URL set
+
+         Verdict: 🟡 CONDITIONAL GO
+         Fix pagination, then ready to submit!
+
+You:     จบ session
+
+🧭 Navi: 📓 Diary: "Three sessions from zero to App Store ready.
+         The debate about SwiftData vs CoreData saved us from
+         sync bugs. Havoc's stress test caught the pagination
+         issue before Apple review would have..."
+         🎓 3 lessons → _aegis-brain/learnings/
+```
+
+**Result: 3 sessions → App Store ready** :rocket:
+
+```
+Session 1: Spec + architecture debate        (~20 min)
+Session 2: Core features + CloudKit + audit   (~30 min)
+Session 3: Widget + full review + launch      (~25 min)
+
+Brain accumulated:
+  _aegis-brain/
+  ├── resonance/architecture-decisions.md  (CoreData chosen)
+  ├── learnings/ (7 lessons across 3 sessions)
+  ├── retrospectives/ (3 retros with honest diaries)
+  └── logs/activity.log (full audit trail)
+```
+
+---
+
 ## :building_construction: Architecture Overview
 
 ```
