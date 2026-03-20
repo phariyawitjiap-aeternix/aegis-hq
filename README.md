@@ -22,7 +22,7 @@ AEGIS (**A**utonomous **E**nhanced **G**roup **I**ntelligence **S**ystem) is a p
 
 ```bash
 # Clone the repository
-git clone https://github.com/Soul-Brews-Studio/AEGIS-Team.git
+git clone https://github.com/phariyawitjiap-aeternix/AEGIS-Team.git
 cd AEGIS-Team
 
 # Make installer executable
@@ -332,55 +332,155 @@ AEGIS-Team/
 
 ## :people_holding_hands: Agent Teams (tmux)
 
-AEGIS spawns coordinated agent teams via tmux sessions. Each team is a predefined composition optimized for a specific workflow.
+AEGIS has **two orchestration modes**. The system auto-selects based on task type:
+
+```
+  Task needs inter-agent communication?
+         │
+    ┌────┴────┐
+    │ NO      │ YES
+    ▼         ▼
+  SUBAGENT   AGENT TEAM (tmux)
+  mode       mode
+```
+
+| Mode | When | Example |
+|:-----|:-----|:--------|
+| **Subagent** | Agent works solo, no cross-talk needed | `"รีวิวโค้ดให้"` → Vigil alone |
+| **Agent Team (tmux)** | Multiple agents need to communicate in real-time | `"ทีมสร้าง"` → Sage + Bolt + Vigil |
+
+### Requirements for tmux mode
+
+```bash
+# Install tmux
+brew install tmux          # macOS
+sudo apt install tmux      # Linux
+
+# Enable Agent Teams (required)
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+
+# If tmux is unavailable → automatic fallback to subagent mode (no error)
+```
 
 ### Review Team — `/aegis-team-review`
 ```
-┌─────────────────────────────────────────┐
-│  aegis-review (tmux session)            │
-│                                         │
-│  ┌─────────┐  ┌─────────┐  ┌────────┐  │
-│  │  Vigil  │  │  Havoc  │  │ Forge  │  │
-│  │ (review)│  │ (challenge) │ (scan) │  │
-│  └────┬────┘  └────┬────┘  └───┬────┘  │
-│       └────────────┼───────────┘        │
-│                    ▼                    │
-│              Navi (synthesize)           │
-└─────────────────────────────────────────┘
+┌─── tmux session: aegis-review ─────────────────────────────┐
+│                                                             │
+│  ┌─ pane 0: 🔧 Forge ─────┐  ┌─ pane 1: 🔴 Havoc ──────┐ │
+│  │ Scanning codebase...    │  │ Challenging assumptions.. │ │
+│  │ → FindingReport sent    │  │ → FindingReport sent     │ │
+│  └─────────────────────────┘  └──────────────────────────┘ │
+│  ┌─ pane 2: 🛡️ Vigil (Lead) ────────────────────────────┐  │
+│  │ Received findings from Forge + Havoc                  │  │
+│  │ Synthesizing → QualityGate: PASS/FAIL                 │  │
+│  └───────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
 ```
-Vigil reviews code quality, Havoc challenges assumptions, Forge scans for data. Navi synthesizes findings.
+Forge gathers data, Havoc challenges assumptions, Vigil synthesizes and issues the quality gate.
 
 ### Build Team — `/aegis-team-build`
 ```
-┌─────────────────────────────────┐
-│  aegis-build (tmux session)     │
-│                                 │
-│  ┌─────────┐      ┌─────────┐  │
-│  │   Bolt  │ ◀──▶ │  Vigil  │  │
-│  │ (implement)     │ (review) │  │
-│  └─────────┘      └─────────┘  │
-│                                 │
-│  Bolt builds, Vigil reviews     │
-│  Tight feedback loop            │
-└─────────────────────────────────┘
+┌─── tmux session: aegis-build ──────────────────────────────┐
+│                                                             │
+│  ┌─ pane 0: 📐 Sage ──────┐  ┌─ pane 1: ⚡ Bolt ────────┐ │
+│  │ Writing spec...         │  │ Waiting for spec...       │ │
+│  │ → PlanProposal sent ──────▶│ Implementing...           │ │
+│  └─────────────────────────┘  │ → StatusUpdate sent ──┐   │ │
+│  ┌─ pane 2: 🛡️ Vigil ────────────────────────────────┼──┐ │
+│  │ Received StatusUpdate ◀────────────────────────────┘  │ │
+│  │ Running 5-pass review... → QualityGate: PASS          │ │
+│  └───────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
 ```
-Bolt implements features while Vigil provides continuous code review in a tight feedback loop.
+Sage designs the spec → Bolt implements → Vigil reviews. Pipeline with review gates between each phase.
 
 ### Debate Team — `/aegis-team-debate`
 ```
-┌─────────────────────────────────┐
-│  aegis-debate (tmux session)    │
-│                                 │
-│  ┌─────────┐      ┌─────────┐  │
-│  │   Sage  │ ◀──▶ │  Havoc  │  │
-│  │ (propose)       │(challenge)│  │
-│  └─────────┘      └─────────┘  │
-│                                 │
-│  Sage proposes, Havoc challenges│
-│  Best ideas survive             │
-└─────────────────────────────────┘
+┌─── tmux session: aegis-debate ─────────────────────────────┐
+│                                                             │
+│  ┌─ pane 0: 📐 Sage ──────┐  ┌─ pane 1: ⚡ Bolt ────────┐ │
+│  │ Proposing Option A...   │  │ Option A is feasible but  │ │
+│  │ → PlanProposal          │  │ costly to maintain...     │ │
+│  └─────────────────────────┘  └──────────────────────────┘ │
+│  ┌─ pane 2: 🔴 Havoc ─────┐  ┌─ pane 3: 🧭 Navi ───────┐ │
+│  │ Option A fails when...  │  │ Synthesizing consensus... │ │
+│  │ → CounterProposal       │  │ → ArchitectureDecision    │ │
+│  └─────────────────────────┘  └──────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
 ```
-Sage proposes architecture options while Havoc stress-tests them. Only the strongest designs survive.
+Sage proposes, Bolt evaluates feasibility, Havoc stress-tests. Navi drives consensus and records the Architecture Decision Record (ADR).
+
+### Which commands use tmux?
+
+| Command | Mode | Agents |
+|:--------|:-----|:-------|
+| `/aegis-pipeline` | Subagent | Phases run sequentially |
+| `/aegis-team-review` | **tmux** | Vigil + Havoc + Forge |
+| `/aegis-team-build` | **tmux** | Sage + Bolt + Vigil |
+| `/aegis-team-debate` | **tmux** | Sage + Bolt + Havoc + Navi |
+| `"รีวิวโค้ด"` | Subagent | Vigil alone |
+| `"ท้าทายการตัดสินใจ"` | Subagent | Havoc alone |
+
+---
+
+## :thailand: Thai Triggers (ภาษาไทย)
+
+AEGIS supports Thai trigger words alongside English. Just type naturally:
+
+| พิมพ์ | Triggers | Command/Skill |
+|:------|:---------|:-------------|
+| "เริ่ม session" | `/aegis-start` | Begin session |
+| "รีวิวโค้ดให้" | code-review + Vigil | 5-pass code review |
+| "ทีมสร้าง" | `/aegis-team-build` | Spawn build team (tmux) |
+| "ทีมรีวิว" | `/aegis-team-review` | Spawn review team (tmux) |
+| "ถกเถียง" | `/aegis-team-debate` | Architecture debate |
+| "เช็ค context" | `/aegis-context` | Check token budget |
+| "สถานะ" | `/aegis-status` | Agent status dashboard |
+| "จบ session" | `/aegis-retro` | Session retrospective |
+| "ส่งต่อ" | `/aegis-handoff` | Handoff to next session |
+| "วางแผน" | orchestrator + Navi | Plan & orchestrate |
+| "เขียน spec" | super-spec + Sage | Write specification |
+| "ตรวจความปลอดภัย" | security-audit | Security audit |
+| "หนี้เทคนิค" | tech-debt-tracker | Tech debt scan |
+| "ท้าทายการตัดสินใจ" | adversarial-review + Havoc | Devil's advocate |
+
+---
+
+## :test_tube: Usage Example — Full Session
+
+```
+You:   /aegis-start
+Navi:  ╔══════════════════════════════════════════════╗
+       ║  🛡️ AEGIS SESSION — My Project               ║
+       ║  CONTEXT: 🟢 8% | AUTONOMY: L1              ║
+       ║  PENDING: (none — first session)              ║
+       ╚══════════════════════════════════════════════╝
+
+You:   รีวิวโค้ดให้หน่อย ดู src/ ทั้งหมด
+Navi:  Trigger: "รีวิวโค้ด" → skill: code-review → agent: 🛡️ Vigil
+Vigil: 5-pass review... 🔴 1 Critical | 🟡 3 Warnings | 🔵 4 Suggestions
+       Gate: ❌ FAIL (1 critical: no input validation)
+
+You:   ทีมสร้าง — fix แล้วเพิ่ม auth system
+Navi:  Trigger: "ทีมสร้าง" → /aegis-team-build (tmux)
+       Spawning: 📐 Sage + ⚡ Bolt + 🛡️ Vigil
+Sage:  Auth spec (JWT + validation) → PlanProposal sent
+Bolt:  Implementing... 4 files created → StatusUpdate sent
+Vigil: Review PASS (0 critical) → QualityGate: ✅
+
+You:   จบ session
+Navi:  📓 AI Diary (150+ words, honest reflection)
+       🔥 Friction: 3 points logged
+       🎓 Lessons: 2 patterns extracted → _aegis-brain/learnings/
+
+You:   ส่งต่อ
+Navi:  ╔══════════════════════════════════════════════╗
+       ║  📋 HANDOFF                                   ║
+       ║  ✅ Done: auth system, input validation      ║
+       ║  📌 Next: write tests, add CRUD endpoints    ║
+       ║  💡 Recommend: upgrade to L2 autonomy        ║
+       ╚══════════════════════════════════════════════╝
+```
 
 ---
 
