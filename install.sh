@@ -293,75 +293,109 @@ TEAMSTATE
 success "Brain resonance files created"
 
 # --------------------------------------------------------------------------
-# Skill Files (stubs based on profile)
+# Copy CLAUDE*.md files from source
 # --------------------------------------------------------------------------
-info "Creating skill stubs for profile: ${PROFILE}..."
+info "Installing CLAUDE*.md files..."
 
-# Minimal skills (always created)
-minimal_skills=("personas" "orchestrator" "code-review" "code-standards" "git-workflow" "bug-lifecycle" "project-navigator")
+claude_files=("CLAUDE.md" "CLAUDE_safety.md" "CLAUDE_agents.md" "CLAUDE_skills.md" "CLAUDE_lessons.md")
 
-# Standard skills (added on top of minimal)
+for f in "${claude_files[@]}"; do
+    src="${SCRIPT_DIR}/${f}"
+    dst="${TARGET_DIR}/${f}"
+    if [[ -f "$src" ]]; then
+        if [[ -f "$dst" && "$UPGRADE" == true ]]; then
+            info "Skipping ${f} (exists, use backup to compare)"
+        else
+            cp "$src" "$dst"
+        fi
+    else
+        warn "Source file not found: ${src} — skipping"
+    fi
+done
+success "CLAUDE*.md files installed"
+
+# --------------------------------------------------------------------------
+# Copy .claude/ config files (agents, commands, references, teams)
+# --------------------------------------------------------------------------
+info "Installing agent definitions, commands, references, and teams..."
+
+copy_dir_contents() {
+    local src_dir="$1"
+    local dst_dir="$2"
+    local label="$3"
+
+    if [[ ! -d "$src_dir" ]]; then
+        warn "Source directory not found: ${src_dir} — skipping ${label}"
+        return
+    fi
+
+    local count=0
+    for f in "$src_dir"/*.md; do
+        [[ -f "$f" ]] || continue
+        local basename=$(basename "$f")
+        local dst="${dst_dir}/${basename}"
+        if [[ -f "$dst" && "$UPGRADE" == true ]]; then
+            continue  # Don't overwrite on upgrade
+        fi
+        cp "$f" "$dst"
+        count=$((count + 1))
+    done
+    success "${count} ${label} installed"
+}
+
+copy_dir_contents "${SCRIPT_DIR}/.claude/agents"     "${TARGET_DIR}/.claude/agents"     "agent definitions"
+copy_dir_contents "${SCRIPT_DIR}/.claude/commands"    "${TARGET_DIR}/.claude/commands"   "commands"
+copy_dir_contents "${SCRIPT_DIR}/.claude/references"  "${TARGET_DIR}/.claude/references" "reference files"
+copy_dir_contents "${SCRIPT_DIR}/.claude/teams"       "${TARGET_DIR}/.claude/teams"      "team configs"
+
+# --------------------------------------------------------------------------
+# Copy skill files based on profile (full files, not stubs)
+# --------------------------------------------------------------------------
+info "Installing skills for profile: ${PROFILE}..."
+
+# Skill lists per profile
+minimal_skills=("ai-personas" "orchestrator" "code-review" "code-standards" "git-workflow" "bug-lifecycle" "project-navigator")
 standard_skills=("super-spec" "test-architect" "security-audit" "tech-debt-tracker" "sprint-tracker" "api-docs")
-
-# Full skills (added on top of standard)
 full_skills=("aegis-distill" "aegis-observe" "adversarial-review" "code-coverage" "retrospective" "course-correction" "skill-marketplace" "aegis-builder")
 
-create_skill_stub() {
+copy_skill() {
     local name="$1"
-    local profile="$2"
-    local file="${TARGET_DIR}/skills/${name}.md"
+    local src="${SCRIPT_DIR}/skills/${name}.md"
+    local dst="${TARGET_DIR}/skills/${name}.md"
 
-    if [[ -f "$file" && "$UPGRADE" == true ]]; then
+    if [[ -f "$dst" && "$UPGRADE" == true ]]; then
         return  # Don't overwrite existing skills on upgrade
     fi
 
-    cat > "$file" <<SKILL
-# Skill: ${name}
-> Profile: ${profile}
-> Version: ${VERSION}
-
-## Purpose
-TODO: Define the purpose of the ${name} skill.
-
-## When to Use
-TODO: Define activation conditions.
-
-## Workflow
-1. TODO: Define step-by-step workflow.
-
-## Inputs
-- TODO: Define required inputs.
-
-## Outputs
-- TODO: Define expected outputs.
-
-## Agent Routing
-- TODO: Define which agents are involved.
-SKILL
+    if [[ -f "$src" ]]; then
+        cp "$src" "$dst"
+    else
+        warn "Skill source not found: ${src}"
+    fi
 }
 
-# Always create minimal skills
+# Always install minimal skills
 for skill in "${minimal_skills[@]}"; do
-    create_skill_stub "$skill" "minimal"
+    copy_skill "$skill"
 done
 
-# Create standard skills if profile is standard or full
+# Install standard skills if profile is standard or full
 if [[ "$PROFILE" == "standard" || "$PROFILE" == "full" ]]; then
     for skill in "${standard_skills[@]}"; do
-        create_skill_stub "$skill" "standard"
+        copy_skill "$skill"
     done
 fi
 
-# Create full skills if profile is full
+# Install full skills if profile is full
 if [[ "$PROFILE" == "full" ]]; then
     for skill in "${full_skills[@]}"; do
-        create_skill_stub "$skill" "full"
+        copy_skill "$skill"
     done
 fi
 
-# Count skills created
+# Count skills installed
 skill_count=$(ls -1 "${TARGET_DIR}/skills/"*.md 2>/dev/null | wc -l | tr -d ' ')
-success "${skill_count} skill stubs created"
+success "${skill_count} skills installed (full definitions, not stubs)"
 
 # --------------------------------------------------------------------------
 # Summary
