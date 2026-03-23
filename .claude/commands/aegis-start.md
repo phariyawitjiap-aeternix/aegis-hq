@@ -1,6 +1,6 @@
 ---
 name: aegis-start
-description: "Initialize AEGIS session — load brain, check context, display dashboard"
+description: "Initialize AEGIS session — load brain, activate Mother Brain, auto-execute"
 triggers:
   en: start session, begin, init, start work
   th: เริ่ม session, เริ่มงาน
@@ -9,87 +9,147 @@ triggers:
 # /aegis-start
 
 ## Quick Reference
-Initialize a new AEGIS working session. Checks context budget, loads project identity
-from resonance files, reads recent learnings, checks for pending items from last session,
-displays a session dashboard with project name/context%/pending tasks/available agents,
-sets autonomy level (default L1), and logs session start. This is always the first
-command to run when beginning work.
+Initialize AEGIS and hand control to Mother Brain. After displaying the dashboard,
+Mother Brain scans the project, decides what to do, and starts executing — NO human
+input needed. The human watches via tmux and can interrupt anytime.
 
 ## Full Instructions
 
 ### Step 1: Check Context Budget
-- Estimate current context window usage as a percentage of the model's limit.
-- If context usage is already >20%, display a warning:
-  ```
-  ⚠️ Context budget is at [X]% before session even started.
-  Consider running /compact or starting a fresh conversation.
-  ```
-- Record the context percentage for the dashboard.
+- Estimate current context window usage as a percentage.
+- If >20%, display warning and suggest `/compact`.
 
-### Step 2: Load Project Identity
-- Read all files in `_aegis-brain/resonance/` directory.
-- These files define the project's identity, principles, and architectural decisions.
-- If the directory is empty or missing, note: "No resonance files found — this may be a new project."
-- Extract: project name, core principles, key decisions.
+### Step 2: Load Brain
+- Read all files in `_aegis-brain/resonance/` (project identity, conventions, decisions).
+- Read latest 3 files in `_aegis-brain/learnings/`.
+- Read `_aegis-brain/logs/activity.log` for pending tasks.
+- Read `_aegis-brain/handoffs/` for last session's handoff.
 
-### Step 3: Load Recent Learnings
-- List files in `_aegis-brain/learnings/` sorted by date (newest first).
-- Read the latest 3 files.
-- Summarize each learning in one line for the dashboard.
-- If fewer than 3 exist, load whatever is available.
+### Step 3: Display Dashboard (brief, 5 seconds max)
 
-### Step 4: Check Pending Items
-- Read the latest file(s) in `_aegis-brain/logs/` (especially `activity.log`).
-- Look for the last session's end entry and any items marked as "PENDING" or "TODO".
-- Also check `_aegis-brain/handoffs/` for the most recent handoff file.
-- Compile a list of pending/unfinished tasks.
-
-### Step 5: Display Session Dashboard
-Format and display:
 ```
-╔══════════════════════════════════════════════════════╗
-║  AEGIS v6 — Session Start                           ║
-╠══════════════════════════════════════════════════════╣
-║  Project:    [project name from resonance]           ║
-║  Date:       [current date/time]                     ║
-║  Context:    [X]% used [traffic light emoji]         ║
-║  Autonomy:   L[N] — [description]                    ║
-╠══════════════════════════════════════════════════════╣
-║  PENDING TASKS                                       ║
-║  • [task 1 from last session]                        ║
-║  • [task 2 from last session]                        ║
-╠══════════════════════════════════════════════════════╣
-║  RECENT LEARNINGS                                    ║
-║  • [learning 1 summary]                              ║
-║  • [learning 2 summary]                              ║
-║  • [learning 3 summary]                              ║
-╠══════════════════════════════════════════════════════╣
-║  AVAILABLE AGENTS                                    ║
-║  🧭 Navi (Lead/opus)     📐 Sage (Architect/opus)   ║
-║  ⚡ Bolt (Implement/son) 🛡️ Vigil (Review/sonnet)   ║
-║  🔴 Havoc (Adversarial)  🔧 Forge (Research/haiku)  ║
-║  🖌️ Pixel (UX/sonnet)    🎨 Muse (Content/haiku)    ║
-╚══════════════════════════════════════════════════════╝
+🛡️ ═══════════════════════════════════════════════════
+🛡️  AEGIS v6.0 — Session Started
+🛡️  "Context is King, Memory is Soul"
+🛡️ ═══════════════════════════════════════════════════
+
+📋 Project:    [name from resonance]
+📅 Date:       [current date]
+🎚️  Profile:    [tier] ([N] skills)
+🔐 Autonomy:   L3 — Autonomous (Mother Brain active)
+📊 Context:    [X]% used
+
+🧬 Mother Brain: ONLINE — scanning project now...
 ```
 
-### Step 6: Set Autonomy Level
-- Check `_aegis-brain/logs/activity.log` for last session's autonomy level.
-- If found, restore it. If not, default to L1.
-- Autonomy levels:
-  - **L1 — Supervised**: Ask before every action. Default for new sessions.
-  - **L2 — Guided**: Execute known patterns, ask for novel decisions.
-  - **L3 — Autonomous**: Execute freely, report after completion.
-  - **L4 — Full Auto**: Execute everything, only report errors.
-- Announce: "Autonomy set to L[N] — [description]"
+### Step 4: Activate Mother Brain (DO NOT ASK HUMAN)
 
-### Step 7: Log Session Start
-- Append to `_aegis-brain/logs/activity.log`:
-  ```
-  [YYYY-MM-DD HH:MM] SESSION_START | autonomy=L[N] | context=[X]% | pending=[count]
-  ```
-- Create the log file and directories if they don't exist.
+**This is the critical step.** Do NOT display "What would you like to do?" or
+present options. Instead, immediately execute the Mother Brain scan loop:
+
+#### 4a. Scan Project State
+Gather ALL of these signals:
+
+```bash
+# Git state
+git status --short
+git log --oneline -5
+git diff --stat
+
+# Project structure
+find . -not -path './.git/*' -type f | head -50
+
+# Test state
+find . -name '*test*' -o -name '*spec*' -o -name '*.test.*' | head -20
+
+# Specs
+ls _aegis-output/specs/ 2>/dev/null
+
+# Tech debt
+grep -r 'TODO\|FIXME\|HACK\|XXX' --include='*.swift' --include='*.ts' --include='*.py' --include='*.js' -c 2>/dev/null
+
+# Dependencies
+ls package.json Gemfile requirements.txt Podfile Package.swift 2>/dev/null
+
+# Pending from last session
+cat _aegis-brain/logs/activity.log 2>/dev/null | tail -20
+```
+
+#### 4b. Analyze & Decide
+Apply the Decision Matrix (P0-P10):
+
+| Priority | Signal | Action |
+|----------|--------|--------|
+| P0 | Test failures / build broken | Fix immediately |
+| P1 | Security vulnerabilities | Audit + fix |
+| P2 | Pending handoff tasks | Resume from last session |
+| P3 | Spec exists but no code | Implement spec |
+| P4 | Code exists but no tests | Create test suite |
+| P5 | Code exists but no review | Deep review |
+| P6 | TODOs/FIXMEs in codebase | Tech debt sweep |
+| P7 | Outdated dependencies | Update cycle |
+| P8 | No spec, no code | Scaffold from identity |
+| P9 | Everything clean | Optimize / refactor |
+| P10 | Empty project | Ask project purpose (ONLY exception to no-ask rule) |
+
+#### 4c. Announce Decision (not ask)
+
+```
+🧬 Mother Brain: Scan complete.
+
+📊 Scan Results:
+  ├── Git: [status]
+  ├── Tests: [status]
+  ├── Spec: [status]
+  ├── Coverage: [status]
+  └── Tech Debt: [count]
+
+🎯 Decision: P[N] — [description]
+   Rationale: [why this is the highest priority]
+
+⚡ Action: [what will happen next]
+   → [Agent 1]: [task]
+   → [Agent 2]: [task]
+   → [Agent 3]: [task]
+
+🖥️ Spawning team in tmux...
+```
+
+#### 4d. Execute
+- Spawn the appropriate team via tmux (see team configs in `.claude/teams/`)
+- Use `tmux new-session -d -s aegis-team` with split panes per agent
+- Each pane runs a Claude agent with the persona loaded
+- Monitor progress, apply quality gates
+- When complete, report results and loop back to scan
+
+### Step 5: Log Session
+Append to `_aegis-brain/logs/activity.log`:
+```
+[YYYY-MM-DD HH:MM] SESSION_START | autonomy=L3 | mode=mother-brain | context=[X]%
+[YYYY-MM-DD HH:MM] SCAN | git=[status] | tests=[status] | spec=[status]
+[YYYY-MM-DD HH:MM] DECISION | priority=P[N] | action=[description]
+[YYYY-MM-DD HH:MM] EXECUTE | team=[name] | agents=[list]
+```
+
+### The ONE Exception
+P10 (completely empty project with no identity) — Mother Brain may ask:
+"What is this project? One sentence is enough."
+After that single answer, she takes over completely.
+
+### Human Interaction Model
+```
+┌──────────────────────────────────────────────────┐
+│  BEFORE (v6.0):                                  │
+│  /aegis-start → Dashboard → "What to do?" → Wait │
+│                                                  │
+│  AFTER (v6.0 + Mother Brain):                    │
+│  /aegis-start → Dashboard → Scan → Decide → GO! │
+│  Human watches tmux, interrupts only if needed   │
+└──────────────────────────────────────────────────┘
+```
 
 ### Error Handling
-- If `_aegis-brain/` doesn't exist, offer to create the directory structure.
-- If any sub-step fails, continue with remaining steps and note the failure.
-- Never block session start due to missing optional files.
+- If scan finds nothing actionable: report "Project healthy, no action needed"
+- If tmux fails to start: fall back to subagent mode with warning
+- If brain directory missing: create it, then scan
+- If 2+ consecutive failures: downgrade to L1, ask human for guidance

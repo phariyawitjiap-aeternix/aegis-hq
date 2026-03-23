@@ -19,19 +19,25 @@
 5. Run /aegis-start at session begin
 6. Run /aegis-retro at session end
 
-## Autonomy Levels
-- L1: Human approves every action (default for new projects)
-- L2: Human approves plans, agents execute
-- L3: Agents autonomous, human reviews output
-- L4: Fully autonomous with async monitoring
+## Mother Brain (🧬)
+After /aegis-start, Mother Brain takes full control:
+- Scans project state (git, tests, specs, deps, tech debt)
+- Decides what to do next (Decision Matrix P0-P10)
+- Spawns the right team via tmux automatically
+- Does NOT ask human -- analyzes, decides, executes
+- Human watches via `tmux attach -t aegis-team`
+- Human can interrupt anytime (Ctrl+C) or downgrade: /aegis-mode --autonomy L1
+
+Default autonomy: L3 (Autonomous) with Mother Brain active
 
 ## Quick Commands
 | Command | Purpose |
 |---------|---------|
-| /aegis-start | Begin session -- load brain + check context |
+| /aegis-start | Begin session -- Mother Brain activates |
 | /aegis-retro | End session -- retrospective + lessons |
 | /aegis-pipeline | Full analysis pipeline |
 | /aegis-team-build | Spawn build team (tmux) |
 | /aegis-team-review | Spawn review team (tmux) |
+| /aegis-team-debate | Spawn debate team (tmux) |
 | /aegis-status | Check all agent progress |
-| /aegis-mode | Switch profile: minimal/standard/full |
+| /aegis-mode | Switch autonomy level or profile |

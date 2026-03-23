@@ -82,12 +82,25 @@ Agent behavior at L4:
 ## Setting the Autonomy Level
 
 ```
-/aegis-mode --autonomy L2
+/aegis-mode --autonomy L3
 ```
 
-- Default for new projects: **L1 (Supervised)**
-- Default for existing projects: **L2 (Guided)**
+- Default after `/aegis-start`: **L3 (Autonomous) — Mother Brain active**
+- Mother Brain scans project → decides → acts without asking human
+- Human can downgrade: `/aegis-mode --autonomy L1` (manual mode)
 - Navi stores the current level in `_aegis-brain/config/autonomy.json`
+
+## Mother Brain (L3/L4 Autonomous Controller)
+
+When autonomy is L3 or L4, Mother Brain (`🧬`) takes control:
+- Scans project state automatically (git, tests, specs, deps, debt)
+- Applies Decision Matrix (P0-P10) to pick highest-priority action
+- Spawns the right team via tmux without asking
+- Reports decisions with rationale (transparent, not secretive)
+- Human watches via `tmux attach -t aegis-team` and interrupts if needed
+- Only asks human for P10 (completely empty project with no identity)
+
+See `.claude/agents/mother-brain.md` for full protocol.
 
 ## Escalation Rules
 
