@@ -131,6 +131,54 @@ cd ~/my-project
 
 > :bulb: **Your brain is sacred.** `--upgrade` never touches `_aegis-brain/`. All your project memory, learnings, and retrospectives survive across updates.
 
+### :rotating_light: IMPORTANT: Restart After Install/Update
+
+Claude Code caches files at session start. After installing or updating AEGIS, **you MUST restart Claude Code** for changes to take effect:
+
+```bash
+# ❌ WRONG — old session still uses cached old files
+# (updating in background while claude is running won't work)
+
+# ✅ RIGHT — full restart sequence:
+
+# Step 1: Exit current Claude Code session
+> /exit
+# or press Ctrl+C then type "exit"
+
+# Step 2: Kill any lingering tmux sessions from old AEGIS
+tmux kill-server 2>/dev/null
+
+# Step 3: Run the upgrade
+~/AEGIS-Team/install.sh --upgrade
+
+# Step 4: Start fresh Claude Code session
+claude
+
+# Step 5: Verify new version loaded
+> /aegis-start
+# 🧬 Mother Brain should activate with updated commands
+```
+
+**Quick one-liner (copy-paste safe):**
+
+```bash
+# Exit claude first, then run:
+tmux kill-server 2>/dev/null; cd ~/my-project && ~/AEGIS-Team/install.sh --upgrade && claude
+```
+
+**Why restart is required:**
+- `.claude/commands/*.md` → slash commands are scanned at session start
+- `.claude/agents/*.md` → agent personas are loaded at session start
+- `.claude/settings.json` → permissions are loaded at session start
+- `CLAUDE.md` → system instructions are loaded at session start
+- If you don't restart, the old cached versions will be used
+
+**Signs that you need to restart:**
+- `/aegis-start` doesn't activate Mother Brain
+- Team commands don't spawn tmux
+- New commands not showing in `/` autocomplete
+- Agents behave differently than expected
+
 ### :wrench: Install Options Reference
 
 ```bash

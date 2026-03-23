@@ -293,15 +293,46 @@ rm CLAUDE.md CLAUDE_safety.md CLAUDE_agents.md CLAUDE_skills.md CLAUDE_lessons.m
 
 ---
 
+## Updating AEGIS
+
+```bash
+# Step 1: Exit Claude Code first (IMPORTANT!)
+> /exit
+
+# Step 2: Kill old tmux sessions
+tmux kill-server 2>/dev/null
+
+# Step 3: Update AEGIS source
+cd ~/AEGIS-Team && git pull origin main
+
+# Step 4: Re-install with --upgrade (preserves brain)
+cd ~/my-project
+~/AEGIS-Team/install.sh --upgrade
+
+# Step 5: Start fresh Claude Code session
+claude
+
+# Step 6: Verify
+> /aegis-start
+# 🧬 Mother Brain should activate
+```
+
+> ⚠️ **ต้อง restart Claude Code ทุกครั้งหลัง update!** ถ้าไม่ restart จะยังใช้ไฟล์เก่าที่ cache ไว้ตอนเปิด session
+
+---
+
 ## Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
 | `/aegis-start` not found | Make sure you're in the project directory with `.claude/commands/` |
-| tmux teams not working | Run `export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` |
+| Commands still use old behavior | **Restart Claude Code** — exit then `claude` again |
+| Mother Brain not activating | Restart Claude Code — `.claude/agents/mother-brain.md` needs fresh load |
+| tmux teams not working | Run `export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` then restart |
 | Context too high at start | Run `/compact` before `/aegis-start` |
 | Skills not loading | Check `ls skills/` — files should NOT be stubs (TODO) |
 | Brain not persisting | Check `ls _aegis-brain/resonance/` — should have .md files |
+| Agent permissions being asked | Check `.claude/settings.json` exists with `allow` array |
 
 ---
 
