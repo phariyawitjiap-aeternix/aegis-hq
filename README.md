@@ -39,6 +39,32 @@ brew install tmux
 
 > :bulb: **Tip:** If `claude` or `node` not found after install, open a **new terminal tab** — your PATH needs to reload.
 
+<details>
+<summary><b>:wrench: Troubleshooting: command not found</b></summary>
+
+```bash
+# If "claude: command not found" or "node: command not found":
+
+# 1. Check if Homebrew PATH is in your shell config
+grep -q '/opt/homebrew/bin' ~/.zshrc && echo "OK" || echo "MISSING"
+grep -q '/opt/homebrew/bin' ~/.zprofile && echo "OK" || echo "MISSING"
+
+# 2. If MISSING — add it:
+echo 'export PATH="/opt/homebrew/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+# 3. If node is installed but not linked:
+brew link node
+
+# 4. Verify everything works:
+node --version    # v18+
+npm --version     # 9+
+claude --version  # Claude Code vX.X.X
+tmux -V           # tmux 3.x (optional)
+```
+
+</details>
+
 ---
 
 ## :rocket: Quick Start
@@ -743,6 +769,94 @@ Sage designs the spec → Bolt implements → Vigil reviews. Pipeline with revie
 └─────────────────────────────────────────────────────────────┘
 ```
 Sage proposes, Bolt evaluates feasibility, Havoc stress-tests. Navi drives consensus and records the Architecture Decision Record (ADR).
+
+### Setting Up tmux Agent Teams (Step by Step)
+
+**Step 1: Install tmux**
+
+```bash
+# macOS
+brew install tmux
+
+# Linux (Ubuntu/Debian)
+sudo apt install tmux
+
+# Verify
+tmux -V    # → tmux 3.x
+```
+
+**Step 2: Learn tmux basics (30 seconds)**
+
+```bash
+# All tmux shortcuts start with Ctrl+B, then a key:
+#
+# Ctrl+B  o     → Switch between panes (cycle through agents)
+# Ctrl+B  z     → Zoom current pane (fullscreen one agent)
+# Ctrl+B  z     → Zoom out (back to all panes)
+# Ctrl+B  [     → Scroll mode (use arrows, q to exit)
+# Ctrl+B  d     → Detach (exit tmux but agents keep running)
+# tmux attach   → Re-attach (get back to your agents)
+```
+
+**Step 3: Use tmux teams from Claude Code**
+
+```bash
+# Open Claude Code in your project
+cd ~/my-project
+claude
+
+# Then use any team command:
+> /aegis-team-build     # Sage specs → Bolt builds → Vigil reviews
+> /aegis-team-review    # Forge scans → Havoc challenges → Vigil gates
+> /aegis-team-debate    # Sage vs Bolt vs Havoc → Navi synthesizes
+```
+
+**Step 4: Watch agents communicate**
+
+When a team command runs, tmux auto-creates a split-pane session:
+
+```
+┌─── Your terminal splits into panes ──────────────────────┐
+│                                                           │
+│  Each pane = one agent running its own Claude instance     │
+│  Agents send structured messages to each other             │
+│  You can watch them work in real-time                      │
+│                                                           │
+│  Ctrl+B o  → cycle through agent panes                    │
+│  Ctrl+B z  → zoom into one agent's full output            │
+│                                                           │
+└───────────────────────────────────────────────────────────┘
+```
+
+**Step 5: Manual tmux session (advanced)**
+
+```bash
+# Create a custom team session manually:
+tmux new-session -d -s my-team
+
+# Split into panes
+tmux split-window -h -t my-team      # vertical split
+tmux split-window -v -t my-team.0    # horizontal split (left)
+tmux split-window -v -t my-team.1    # horizontal split (right)
+
+# Label panes
+tmux set -t my-team pane-border-status top
+tmux select-pane -t my-team.0 -T "📐 Sage"
+tmux select-pane -t my-team.1 -T "⚡ Bolt"
+tmux select-pane -t my-team.2 -T "🛡️ Vigil"
+
+# Run Claude in each pane
+tmux send-keys -t my-team.0 "cd ~/my-project && claude" Enter
+tmux send-keys -t my-team.1 "cd ~/my-project && claude" Enter
+tmux send-keys -t my-team.2 "cd ~/my-project && claude" Enter
+
+# Attach to watch
+tmux attach -t my-team
+```
+
+**Fallback: No tmux? No problem.**
+
+If tmux is not installed, AEGIS automatically falls back to **subagent mode** — agents run as background processes instead of visible panes. Everything still works, you just can't watch them in real-time.
 
 ### Which commands use tmux?
 
