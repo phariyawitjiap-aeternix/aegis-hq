@@ -88,6 +88,20 @@ npm install -g @anthropic-ai/claude-code
 
 # 2. Clone AEGIS framework
 git clone https://github.com/phariyawitjiap-aeternix/AEGIS-Team.git ~/AEGIS-Team
+
+# 3. Enable Agent Teams (CRITICAL — without this, tmux panes won't work)
+#    This adds the setting to your GLOBAL Claude Code config
+cat ~/.claude/settings.json 2>/dev/null | python3 -c "
+import json,sys
+try: d=json.load(sys.stdin)
+except: d={}
+d.setdefault('env',{})['CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS']='1'
+print(json.dumps(d,indent=2))
+" > /tmp/claude-settings-tmp.json && mv /tmp/claude-settings-tmp.json ~/.claude/settings.json
+
+# Verify:
+cat ~/.claude/settings.json | grep AGENT_TEAMS
+# Should show: "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
 ```
 
 ```bash
@@ -105,15 +119,19 @@ git init
 # ✅ 55 files installed (full content, not stubs)
 # ✅ 9 agents, 15 commands, 13 skills, brain, settings.json
 
-# 3. Start working
-claude                    # Open Claude Code
-> /aegis-start            # Mother Brain activates automatically
+# 3. Start tmux FIRST, then Claude Code INSIDE tmux
+#    ⚠️ This order is critical — Claude needs tmux to create split panes
+tmux new-session -s aegis  # Start tmux session
+claude                     # Start Claude Code INSIDE tmux
+
+# 4. Inside Claude Code:
+> /aegis-start             # Mother Brain activates automatically
 #
 # 🧬 Mother Brain: ONLINE
 # 🧬 Scanning project state...
 # 🧬 Decision: P10 — Empty project
-# 🧬 Spawning team in tmux...
-# (agents work autonomously — watch with: tmux attach -t aegis-team)
+# 🧬 Spawning agent team in tmux panes...
+# (each agent gets its own tmux pane — you can see them work)
 ```
 
 **Profile options:** `minimal` (7 skills) · `standard` (13 skills) · `full` (21 skills)
