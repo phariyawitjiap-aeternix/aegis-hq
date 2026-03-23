@@ -3,8 +3,8 @@ name: aegis-review
 description: "Deep multi-perspective code review team"
 lead: vigil
 members: [havoc, forge]
-mode: agent-team
-fallback: subagent
+mode: tmux
+requires: tmux
 ---
 
 ## Team Purpose

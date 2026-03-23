@@ -119,17 +119,22 @@ fi
 success "git found: $(git --version)"
 
 if ! command -v tmux &>/dev/null; then
-    warn "tmux not found. Multi-agent spawning will not work."
-    warn "Install with: brew install tmux (macOS) or apt install tmux (Linux)"
+    error "tmux is REQUIRED for AEGIS Agent Teams but not found."
+    echo "  Install with: brew install tmux (macOS) or apt install tmux (Linux)"
+    echo "  tmux is core to AEGIS — agents communicate via tmux panes."
+    exit 1
 else
     success "tmux found: $(tmux -V)"
 fi
 
 # Check if claude CLI is available
-if command -v claude &>/dev/null; then
-    success "claude CLI found"
+if ! command -v claude &>/dev/null; then
+    error "Claude Code CLI is REQUIRED but not found."
+    echo "  Install with: npm install -g @anthropic-ai/claude-code"
+    echo "  Requires Node.js 18+: brew install node"
+    exit 1
 else
-    warn "claude CLI not found. Install from https://claude.ai/cli"
+    success "claude CLI found: $(claude --version 2>&1 | head -1)"
 fi
 
 # --------------------------------------------------------------------------

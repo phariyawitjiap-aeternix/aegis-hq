@@ -14,9 +14,10 @@ claude --version
 # 2. Git (required)
 git --version
 
-# 3. tmux (optional — for Agent Teams)
+# 3. tmux (REQUIRED — core of AEGIS Agent Teams)
 brew install tmux        # macOS
 sudo apt install tmux    # Linux
+tmux -V                  # verify: tmux 3.x
 ```
 
 ---
@@ -223,7 +224,7 @@ claude
 
 ---
 
-## Enable tmux Agent Teams (Optional but Recommended)
+## Enable tmux Agent Teams (Required)
 
 ```bash
 # Add to your shell profile (~/.zshrc or ~/.bashrc):

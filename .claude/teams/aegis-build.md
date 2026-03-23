@@ -3,8 +3,8 @@ name: aegis-build
 description: "Spec-to-implementation build team"
 lead: bolt
 members: [sage, vigil]
-mode: agent-team
-fallback: subagent
+mode: tmux
+requires: tmux
 ---
 
 ## Team Purpose

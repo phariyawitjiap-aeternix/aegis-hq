@@ -14,7 +14,7 @@ Dual-mode multi-agent orchestration engine for AEGIS.
 - **Auto-select**: Simple tasks → Subagent; Complex/parallel → Agent Team
 - **Review gates**: Phase transitions require quality checks before proceeding
 - **Context budget**: Monitor token usage, compress when approaching limits
-- **Fallback**: If tmux unavailable, degrade gracefully to subagent mode
+- **tmux required**: Agent Teams run in tmux panes — tmux is a core dependency, not optional
 - **Output**: Task status logged to `_aegis-brain/logs/activity.log`
 
 ## Full Instructions

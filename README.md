@@ -33,7 +33,7 @@ claude --version   # Should show: Claude Code vX.X.X
 # 3. Git
 git --version
 
-# 4. tmux (optional — for Agent Teams with visible panes)
+# 4. tmux (REQUIRED — core of Agent Teams)
 brew install tmux
 ```
 
@@ -60,7 +60,7 @@ brew link node
 node --version    # v18+
 npm --version     # 9+
 claude --version  # Claude Code vX.X.X
-tmux -V           # tmux 3.x (optional)
+tmux -V           # tmux 3.x (REQUIRED)
 ```
 
 </details>
@@ -719,7 +719,7 @@ sudo apt install tmux      # Linux
 # Enable Agent Teams (required)
 export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 
-# If tmux is unavailable → automatic fallback to subagent mode (no error)
+# tmux is REQUIRED for AEGIS Agent Teams — install it before using team commands
 ```
 
 ### Review Team — `/aegis-team-review`
@@ -854,9 +854,15 @@ tmux send-keys -t my-team.2 "cd ~/my-project && claude" Enter
 tmux attach -t my-team
 ```
 
-**Fallback: No tmux? No problem.**
+### :rotating_light: tmux is Required
 
-If tmux is not installed, AEGIS automatically falls back to **subagent mode** — agents run as background processes instead of visible panes. Everything still works, you just can't watch them in real-time.
+tmux is a **core dependency** of AEGIS — not optional. Agent Teams rely on tmux for:
+- **Visible agent communication** — see what each agent is thinking
+- **Parallel execution** — agents work simultaneously in split panes
+- **Real-time monitoring** — watch message passing between agents
+- **Session persistence** — detach/reattach without losing agent state
+
+Without tmux, team commands (`/aegis-team-*`) will not function. Install tmux before using AEGIS.
 
 ### Which commands use tmux?
 
