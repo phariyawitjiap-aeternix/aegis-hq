@@ -69,152 +69,190 @@ tmux -V           # tmux 3.x (REQUIRED)
 
 ## :rocket: Installation
 
-### :new: New Install (first time)
+### :new: Mode A — New Install (first time)
 
 ```bash
-# Step 1: Clone AEGIS framework (one-time only)
-git clone https://github.com/phariyawitjiap-aeternix/AEGIS-Team.git ~/AEGIS-Team
+# ┌─────────────────────────────────────────────────────────────┐
+# │  ONE-TIME SETUP (only do this once on your machine)         │
+# └─────────────────────────────────────────────────────────────┘
 
-# Step 2: Create your project (or cd to existing project)
+# 1. Install prerequisites
+brew install node tmux
+npm install -g @anthropic-ai/claude-code
+
+# 2. Clone AEGIS framework
+git clone https://github.com/phariyawitjiap-aeternix/AEGIS-Team.git ~/AEGIS-Team
+```
+
+```bash
+# ┌─────────────────────────────────────────────────────────────┐
+# │  PER-PROJECT INSTALL (do this for each new project)         │
+# └─────────────────────────────────────────────────────────────┘
+
+# 1. Create or navigate to your project
 mkdir ~/my-project && cd ~/my-project
 git init
 
-# Step 3: Install AEGIS into your project
+# 2. Install AEGIS into this project
 ~/AEGIS-Team/install.sh --profile standard --project-name "My Project"
+#
+# ✅ 55 files installed (full content, not stubs)
+# ✅ 9 agents, 15 commands, 13 skills, brain, settings.json
 
-# Step 4: Open Claude Code
-claude
-
-# Step 5: Mother Brain takes over — no input needed
-> /aegis-start
+# 3. Start working
+claude                    # Open Claude Code
+> /aegis-start            # Mother Brain activates automatically
 #
 # 🧬 Mother Brain: ONLINE
 # 🧬 Scanning project state...
 # 🧬 Decision: P10 — Empty project
-# 🧬 "What is this project? One sentence is enough."
-#
-# You: iOS Todo App with SwiftUI + CloudKit
-#
-# 🧬 Mother Brain: Got it. Spawning team...
-# (agents work autonomously from here — watch in tmux)
+# 🧬 Spawning team in tmux...
+# (agents work autonomously — watch with: tmux attach -t aegis-team)
 ```
 
 **Profile options:** `minimal` (7 skills) · `standard` (13 skills) · `full` (21 skills)
 
-### :arrows_counterclockwise: Update Existing Install
+### :arrows_counterclockwise: Mode B — Update Existing Install
 
-When AEGIS releases a new version, update your project:
-
-```bash
-# Step 1: Update the AEGIS framework source
-cd ~/AEGIS-Team
-git pull origin main
-
-# Step 2: Re-install with --upgrade flag (preserves your brain + learnings)
-cd ~/my-project
-~/AEGIS-Team/install.sh --upgrade --profile standard
-```
-
-**What `--upgrade` preserves:**
-| Preserved (NOT overwritten) | Updated (overwritten) |
-|:---------------------------|:---------------------|
-| `_aegis-brain/` (all memory) | `.claude/commands/` (slash commands) |
-| `_aegis-brain/resonance/` (identity) | `.claude/agents/` (personas) |
-| `_aegis-brain/learnings/` (lessons) | `.claude/references/` (protocols) |
-| `_aegis-brain/retrospectives/` (retros) | `.claude/teams/` (team configs) |
-| `_aegis-brain/logs/` (activity) | `skills/` (skill definitions) |
-| `CLAUDE_lessons.md` (your patterns) | `CLAUDE.md` (hub — updated) |
-| | `CLAUDE_agents.md` (agent docs) |
-| | `CLAUDE_safety.md` (safety rules) |
-| | `CLAUDE_skills.md` (skill catalog) |
-| | `.claude/settings.json` (permissions) |
-
-> :bulb: **Your brain is sacred.** `--upgrade` never touches `_aegis-brain/`. All your project memory, learnings, and retrospectives survive across updates.
-
-### :rotating_light: IMPORTANT: Restart After Install/Update
-
-Claude Code caches files at session start. After installing or updating AEGIS, **you MUST restart Claude Code** for changes to take effect:
+When AEGIS releases a new version:
 
 ```bash
-# ❌ WRONG — old session still uses cached old files
-# (updating in background while claude is running won't work)
+# ┌─────────────────────────────────────────────────────────────┐
+# │  ⚠️  STEP 0: EXIT CLAUDE CODE FIRST!                       │
+# │  Claude caches files at startup. If you update while Claude │
+# │  is running, it will still use the OLD cached files.        │
+# │  You MUST exit → update → restart.                          │
+# └─────────────────────────────────────────────────────────────┘
 
-# ✅ RIGHT — full restart sequence:
+# 1. Exit Claude Code (if running)
+> /exit                   # inside Claude Code
+# or Ctrl+C then "exit"
 
-# Step 1: Exit current Claude Code session
-> /exit
-# or press Ctrl+C then type "exit"
-
-# Step 2: Kill any lingering tmux sessions from old AEGIS
+# 2. Kill old tmux agent sessions
 tmux kill-server 2>/dev/null
 
-# Step 3: Run the upgrade
+# 3. Update AEGIS source
+cd ~/AEGIS-Team && git pull origin main
+
+# 4. Re-install with --upgrade (preserves your brain + learnings)
+cd ~/my-project
 ~/AEGIS-Team/install.sh --upgrade
 
-# Step 4: Start fresh Claude Code session
+# 5. Start fresh Claude Code session
 claude
-
-# Step 5: Verify new version loaded
 > /aegis-start
-# 🧬 Mother Brain should activate with updated commands
+# 🧬 Mother Brain loads from NEW files ✅
 ```
 
 **Quick one-liner (copy-paste safe):**
 
 ```bash
-# Exit claude first, then run:
-tmux kill-server 2>/dev/null; cd ~/my-project && ~/AEGIS-Team/install.sh --upgrade && claude
+# Exit claude first, then:
+tmux kill-server 2>/dev/null; cd ~/AEGIS-Team && git pull && cd ~/my-project && ~/AEGIS-Team/install.sh --upgrade && claude
 ```
 
-**Why restart is required:**
-- `.claude/commands/*.md` → slash commands are scanned at session start
-- `.claude/agents/*.md` → agent personas are loaded at session start
-- `.claude/settings.json` → permissions are loaded at session start
-- `CLAUDE.md` → system instructions are loaded at session start
-- If you don't restart, the old cached versions will be used
+**What `--upgrade` preserves vs overwrites:**
 
-**Signs that you need to restart:**
-- `/aegis-start` doesn't activate Mother Brain
-- Team commands don't spawn tmux
-- New commands not showing in `/` autocomplete
-- Agents behave differently than expected
+| :lock: Preserved (your data) | :arrows_counterclockwise: Updated (framework files) |
+|:---------------------------|:---------------------|
+| `_aegis-brain/` (all memory) | `.claude/commands/` (15 slash commands) |
+| `_aegis-brain/resonance/` (project identity) | `.claude/agents/` (9 agent personas) |
+| `_aegis-brain/learnings/` (accumulated lessons) | `.claude/references/` (6 protocol files) |
+| `_aegis-brain/retrospectives/` (session retros) | `.claude/teams/` (3 team configs) |
+| `_aegis-brain/logs/` (activity history) | `.claude/settings.json` (permissions) |
+| `CLAUDE_lessons.md` (your patterns) | `CLAUDE.md`, `CLAUDE_agents.md` |
+| | `CLAUDE_safety.md`, `CLAUDE_skills.md` |
+| | `skills/` (13-21 skill definitions) |
+
+> :lock: **Your brain is sacred.** `--upgrade` never touches `_aegis-brain/` or `CLAUDE_lessons.md`. All project memory, learnings, and retrospectives survive across updates. A backup of overwritten files is saved to `_aegis-backup/` before each upgrade.
+
+### :computer: Spawning Agent Teams (aegis-team.sh)
+
+After install, use `aegis-team.sh` to spawn real agent teams in tmux:
+
+```bash
+# ┌─────────────────────────────────────────────────────────────┐
+# │  SPAWNING TEAMS — each agent runs its own Claude instance   │
+# │  in a separate tmux pane. Watch them work in real-time.     │
+# └─────────────────────────────────────────────────────────────┘
+
+# Build team: Sage specs → Bolt implements → Vigil reviews
+~/AEGIS-Team/aegis-team.sh --team build --task "Implement auth system"
+
+# Review team: Forge scans → Havoc challenges → Vigil gates
+~/AEGIS-Team/aegis-team.sh --team review --task "Review src/ directory"
+
+# Debate team: Sage proposes → Bolt evaluates → Havoc challenges → Navi decides
+~/AEGIS-Team/aegis-team.sh --team debate --task "SQL vs NoSQL"
+
+# Custom team: pick any agents
+~/AEGIS-Team/aegis-team.sh --team custom --agents "sage,bolt" --task "Quick spec"
+
+# Manage sessions:
+~/AEGIS-Team/aegis-team.sh --attach     # Watch agents work
+~/AEGIS-Team/aegis-team.sh --kill       # Stop all agents
+```
+
+```
+┌─── tmux: aegis-team ──────────────────────────────────────────────┐
+│ ┌─ 📐 Sage — Architect ────────┐ ┌─ ⚡ Bolt — Implementer ──────┐ │
+│ │ Writing spec...               │ │ Waiting for spec...           │ │
+│ │ → PlanProposal sent ──────────│─▶ Implementing 12 files...     │ │
+│ └───────────────────────────────┘ └───────────────────────────────┘ │
+│ ┌─ 🛡️ Vigil — Reviewer ────────┐ ┌─ 📋 Activity Log ────────────┐ │
+│ │ Review Pass 1: Correctness ✅ │ │ 18:31 Sage → in_progress     │ │
+│ │ Review Pass 2: Security ✅    │ │ 18:34 Sage → PlanProposal    │ │
+│ │ → QualityGate: PASS           │ │ 18:37 Bolt → done (12 files) │ │
+│ └───────────────────────────────┘ │ 18:40 Vigil → APPROVED       │ │
+│                                   └───────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────┘
+
+  Ctrl+B o  → switch pane    Ctrl+B z  → zoom pane
+  Ctrl+B d  → detach         Ctrl+B [  → scroll history
+```
 
 ### :wrench: Install Options Reference
 
 ```bash
-# Full syntax
+# Syntax
 ~/AEGIS-Team/install.sh [OPTIONS]
+~/AEGIS-Team/aegis-team.sh [OPTIONS]
 
-# Options:
+# install.sh options:
 #   --profile <tier>        minimal | standard | full (default: standard)
 #   --project-name <name>   Project name for brain identity
 #   --target-dir <path>     Target directory (default: current dir)
 #   --upgrade               Update existing install (preserve brain)
+
+# aegis-team.sh options:
+#   --team <name>           build | review | debate | custom (required)
+#   --task <description>    What the team should do (required)
+#   --agents <list>         Comma-separated agents for custom team
+#   --project <path>        Project directory (default: current dir)
+#   --session <name>        tmux session name (default: aegis-team)
+#   --kill                  Kill existing agent session
+#   --attach                Attach to existing session
 
 # Examples:
 ~/AEGIS-Team/install.sh --profile minimal --project-name "Quick Script"
 ~/AEGIS-Team/install.sh --profile full --project-name "Enterprise App"
 ~/AEGIS-Team/install.sh --upgrade --profile full    # upgrade minimal→full
 ~/AEGIS-Team/install.sh --upgrade                   # update keeping same profile
+~/AEGIS-Team/aegis-team.sh --team build --task "Build auth" --project ~/my-app
 ```
 
 ### :clipboard: Post-Install Checklist
 
-After installing, verify everything works:
-
 ```bash
-# 1. Check all dependencies are found
-claude --version    # Claude Code CLI ✅
-tmux -V             # tmux 3.x ✅
-git --version       # git 2.x ✅
+# Verify everything works:
+claude --version                        # Claude Code CLI ✅
+tmux -V                                 # tmux 3.x ✅
+ls CLAUDE.md                            # Hub file ✅
+ls .claude/agents/mother-brain.md       # Mother Brain ✅
+ls .claude/settings.json                # Permissions (57 allow) ✅
+wc -l skills/*.md | tail -1             # Skills (not stubs) ✅
 
-# 2. Check AEGIS files are present
-ls CLAUDE.md                    # Hub file ✅
-ls .claude/commands/aegis-start.md   # Commands ✅
-ls .claude/agents/mother-brain.md    # Mother Brain ✅
-ls _aegis-brain/resonance/           # Brain ✅
-
-# 3. Start Claude Code and run AEGIS
+# Start and verify:
 claude
 > /aegis-start
 # 🧬 Mother Brain should activate and scan your project
