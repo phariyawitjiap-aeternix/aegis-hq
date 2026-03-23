@@ -8,104 +8,73 @@ triggers:
 
 # /aegis-team-build
 
-## Quick Reference
-Spawns a build team using tmux. Lead: Bolt (speed implementer), Members: Sage (spec writer),
-Vigil (reviewer). Pipeline: Sage writes/refines spec, Bolt implements based on spec,
-Vigil reviews implementation. Gates between each step. Iterate if Vigil requests changes.
-Falls back to sequential if tmux unavailable.
+When this command is triggered, you MUST execute the aegis-team.sh script via Bash to spawn real tmux agent sessions. Do NOT just describe what would happen — actually run the command.
 
-## Full Instructions
+## Step 1: Determine the task
 
-### Step 1: Check tmux Availability
-- Run `which tmux` to check if tmux is installed.
-- If tmux is available:
-  ```
-  ✅ tmux available — spawning Build Team
-  ```
-- If NOT available:
-  ```
-  ⚠️ tmux not available — falling back to sequential mode
-  Build pipeline will run steps one at a time.
-  ```
+Look at the user's message for what they want built. If the user said something like:
+- "ทีมสร้าง — implement auth system" → task is "implement auth system"
+- "/aegis-team-build add user CRUD" → task is "add user CRUD"
+- Just "/aegis-team-build" with no task → ask the user: "What should the build team work on?"
 
-### Step 2: Spawn Team
-- Create tmux session: `aegis-build-[timestamp]`
-- Team structure:
-  - **Lead**: Bolt (⚡ Speed) — implements features rapidly
-  - **Member**: Sage (📖 Analyst) — writes specs and provides architectural guidance
-  - **Member**: Vigil (🛡️ Guardian) — reviews implementation for quality and correctness
-- Each agent receives their role and the feature/task description from the user.
+Store the task description in a variable.
 
-### Step 3: Pipeline Execution
+## Step 2: Execute aegis-team.sh
 
-#### Stage 1 — Specification (Sage)
-**Sage writes/refines the spec:**
-- If user provided a spec: Sage reviews and refines it.
-- If user provided a description: Sage creates a full spec.
-- Spec includes:
-  - Feature description and goals
-  - Technical approach
-  - File structure (new files, modified files)
-  - Interface definitions (types, APIs, function signatures)
-  - Edge cases and error handling
-  - Test requirements
-- Output: spec document shared with Bolt.
+Run this Bash command (replace TASK with the actual task):
 
-#### GATE: Spec Review
-- Navi (or user if L1 autonomy) reviews the spec.
-- Options: approve, request changes, or abort.
-- If approved: proceed to implementation.
+```
+~/AEGIS-Team/aegis-team.sh --team build --task "TASK" --project "$(pwd)"
+```
 
-#### Stage 2 — Implementation (Bolt)
-**Bolt implements based on spec:**
-- Follow spec exactly for interfaces and structure.
-- Implement all specified functionality.
-- Write clean, idiomatic code following project conventions.
-- Include inline documentation for non-obvious logic.
-- Create or update tests as specified.
-- Signal completion with list of files created/modified.
+If aegis-team.sh is not found at ~/AEGIS-Team/, try the SCRIPT_DIR from CLAUDE.md or find it:
+```
+find ~ -name "aegis-team.sh" -maxdepth 3 2>/dev/null | head -1
+```
 
-#### GATE: Implementation Review
-- Pause before review to ensure all files are saved.
+## Step 3: Show the user how to watch
 
-#### Stage 3 — Review (Vigil)
-**Vigil reviews the implementation:**
-- Verify implementation matches spec.
-- Check code quality:
-  - Error handling complete?
-  - Edge cases covered?
-  - Tests adequate?
-  - No security issues?
-  - Code style consistent with project?
-- Output review with verdict:
-  - ✅ **APPROVE**: Code is good to merge.
-  - 🔄 **REQUEST CHANGES**: List specific changes needed.
-  - ❌ **REJECT**: Fundamental issues require re-implementation.
+After the script runs successfully, tell the user:
 
-#### Iteration Loop
-- If Vigil requests changes:
-  - Bolt receives the change requests.
-  - Bolt makes the changes.
-  - Vigil re-reviews.
-  - Maximum 3 iterations before escalating to user.
-- If Vigil approves:
-  - Pipeline complete.
-  - Present summary to user.
+```
+🛡️ Build Team Spawned in tmux!
 
-### Step 4: Final Output
-- Display build summary:
-  ```
-  ╔══════════════════════════════════════════════════╗
-  ║  Build Complete                                 ║
-  ╠══════════════════════════════════════════════════╣
-  ║  Feature: [name]                                ║
-  ║  Files created: [N]                             ║
-  ║  Files modified: [N]                            ║
-  ║  Tests: [N] written, [pass/fail status]         ║
-  ║  Review: ✅ Approved by Vigil                   ║
-  ║  Iterations: [N]                                ║
-  ╚══════════════════════════════════════════════════╝
-  ```
-- List all created/modified files.
-- Suggest: run /aegis-verify for additional validation.
-- Clean up tmux session.
+Agents:
+  📐 Sage — writing spec
+  ⚡ Bolt — implementing
+  🛡️ Vigil — reviewing
+
+Watch agents work:
+  tmux attach -t aegis-team
+
+Controls:
+  Ctrl+B o  → switch pane
+  Ctrl+B z  → zoom pane
+  Ctrl+B d  → detach (agents keep working)
+```
+
+## Step 4: If tmux or aegis-team.sh fails
+
+If the Bash command fails:
+1. Check: `which tmux` — if not found, tell user: `brew install tmux`
+2. Check: `ls ~/AEGIS-Team/aegis-team.sh` — if not found, tell user to clone AEGIS-Team
+3. Check: `which claude` — if not found, tell user: `npm install -g @anthropic-ai/claude-code`
+
+Do NOT fall back to "sequential mode" or "subagent mode" — tmux is required.
+
+## Team Composition
+
+| Agent | Role | Model |
+|-------|------|-------|
+| 📐 Sage | Architect — writes spec | opus |
+| ⚡ Bolt | Implementer — builds from spec | sonnet |
+| 🛡️ Vigil | Reviewer — quality gates | sonnet |
+
+## Pipeline
+
+```
+Sage (spec) → GATE → Bolt (implement) → GATE → Vigil (review)
+                                                    ↓
+                                              APPROVE → done
+                                              CHANGES → Bolt fixes → Vigil re-reviews
+```
