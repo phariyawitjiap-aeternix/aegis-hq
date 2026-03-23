@@ -1,6 +1,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/version-6.0-blue?style=for-the-badge" alt="Version 6.0"/>
-  <img src="https://img.shields.io/badge/agents-8-green?style=for-the-badge" alt="8 Agents"/>
+  <img src="https://img.shields.io/badge/agents-9_(+Mother_Brain)-green?style=for-the-badge" alt="9 Agents"/>
   <img src="https://img.shields.io/badge/skills-21-orange?style=for-the-badge" alt="21 Skills"/>
   <img src="https://img.shields.io/badge/license-MIT-purple?style=for-the-badge" alt="MIT License"/>
   <img src="https://img.shields.io/badge/platform-Claude%20Code-black?style=for-the-badge" alt="Claude Code"/>
@@ -10,7 +10,7 @@
 
 > **"Context is King, Memory is Soul"**
 >
-> 8 AI Personas · 21 Skills · 15 Commands · Persistent Brain · tmux Agent Teams
+> 🧬 Mother Brain · 9 AI Agents · 21 Skills · 15 Commands · Persistent Brain · tmux Agent Teams
 
 ---
 
@@ -67,13 +67,15 @@ tmux -V           # tmux 3.x (REQUIRED)
 
 ---
 
-## :rocket: Quick Start
+## :rocket: Installation
+
+### :new: New Install (first time)
 
 ```bash
 # Step 1: Clone AEGIS framework (one-time only)
 git clone https://github.com/phariyawitjiap-aeternix/AEGIS-Team.git ~/AEGIS-Team
 
-# Step 2: Create your project
+# Step 2: Create your project (or cd to existing project)
 mkdir ~/my-project && cd ~/my-project
 git init
 
@@ -83,13 +85,94 @@ git init
 # Step 4: Open Claude Code
 claude
 
-# Step 5: Inside Claude Code, type your first command:
+# Step 5: Mother Brain takes over — no input needed
 > /aegis-start
+#
+# 🧬 Mother Brain: ONLINE
+# 🧬 Scanning project state...
+# 🧬 Decision: P10 — Empty project
+# 🧬 "What is this project? One sentence is enough."
+#
+# You: iOS Todo App with SwiftUI + CloudKit
+#
+# 🧬 Mother Brain: Got it. Spawning team...
+# (agents work autonomously from here — watch in tmux)
 ```
 
 **Profile options:** `minimal` (7 skills) · `standard` (13 skills) · `full` (21 skills)
 
-> :book: **[Full Getting Started Guide →](GETTING_STARTED.md)** — step-by-step terminal instructions with troubleshooting
+### :arrows_counterclockwise: Update Existing Install
+
+When AEGIS releases a new version, update your project:
+
+```bash
+# Step 1: Update the AEGIS framework source
+cd ~/AEGIS-Team
+git pull origin main
+
+# Step 2: Re-install with --upgrade flag (preserves your brain + learnings)
+cd ~/my-project
+~/AEGIS-Team/install.sh --upgrade --profile standard
+```
+
+**What `--upgrade` preserves:**
+| Preserved (NOT overwritten) | Updated (overwritten) |
+|:---------------------------|:---------------------|
+| `_aegis-brain/` (all memory) | `.claude/commands/` (slash commands) |
+| `_aegis-brain/resonance/` (identity) | `.claude/agents/` (personas) |
+| `_aegis-brain/learnings/` (lessons) | `.claude/references/` (protocols) |
+| `_aegis-brain/retrospectives/` (retros) | `.claude/teams/` (team configs) |
+| `_aegis-brain/logs/` (activity) | `skills/` (skill definitions) |
+| `CLAUDE_lessons.md` (your patterns) | `CLAUDE.md` (hub — updated) |
+| | `CLAUDE_agents.md` (agent docs) |
+| | `CLAUDE_safety.md` (safety rules) |
+| | `CLAUDE_skills.md` (skill catalog) |
+| | `.claude/settings.json` (permissions) |
+
+> :bulb: **Your brain is sacred.** `--upgrade` never touches `_aegis-brain/`. All your project memory, learnings, and retrospectives survive across updates.
+
+### :wrench: Install Options Reference
+
+```bash
+# Full syntax
+~/AEGIS-Team/install.sh [OPTIONS]
+
+# Options:
+#   --profile <tier>        minimal | standard | full (default: standard)
+#   --project-name <name>   Project name for brain identity
+#   --target-dir <path>     Target directory (default: current dir)
+#   --upgrade               Update existing install (preserve brain)
+
+# Examples:
+~/AEGIS-Team/install.sh --profile minimal --project-name "Quick Script"
+~/AEGIS-Team/install.sh --profile full --project-name "Enterprise App"
+~/AEGIS-Team/install.sh --upgrade --profile full    # upgrade minimal→full
+~/AEGIS-Team/install.sh --upgrade                   # update keeping same profile
+```
+
+### :clipboard: Post-Install Checklist
+
+After installing, verify everything works:
+
+```bash
+# 1. Check all dependencies are found
+claude --version    # Claude Code CLI ✅
+tmux -V             # tmux 3.x ✅
+git --version       # git 2.x ✅
+
+# 2. Check AEGIS files are present
+ls CLAUDE.md                    # Hub file ✅
+ls .claude/commands/aegis-start.md   # Commands ✅
+ls .claude/agents/mother-brain.md    # Mother Brain ✅
+ls _aegis-brain/resonance/           # Brain ✅
+
+# 3. Start Claude Code and run AEGIS
+claude
+> /aegis-start
+# 🧬 Mother Brain should activate and scan your project
+```
+
+> :book: **[Full Getting Started Guide →](GETTING_STARTED.md)** — step-by-step terminal walkthrough with iOS Todo App example
 
 ---
 
@@ -443,10 +526,11 @@ Brain accumulated:
 
 ---
 
-## :busts_in_silhouette: The 8 Agents
+## :busts_in_silhouette: The 9 Agents
 
 | # | Agent | Model | Role | Blast Radius |
 |:-:|:------|:-----:|:-----|:-------------|
+| 🧬 | **Mother Brain** | `opus` | **Autonomous Controller** — Scans, decides, spawns teams, no human input needed | entire project (read+write) |
 | 1 | :compass: **Navi** | `opus` | Navigator/Lead — Orchestrates, synthesizes, writes retros | CLAUDE*.md, brain, output |
 | 2 | :triangular_ruler: **Sage** | `opus` | Architect — Specs, system design, ADRs | docs, specs, architecture |
 | 3 | :zap: **Bolt** | `sonnet` | Implementer — Writes code, builds features, runs tests | src, lib, tests, configs |
@@ -455,6 +539,35 @@ Brain accumulated:
 | 6 | :wrench: **Forge** | `haiku` | Scanner/Research — Gathers data, scans repos, metrics | brain/logs, output/scans |
 | 7 | :art: **Pixel** | `sonnet` | UX Designer — UI/UX, accessibility, design systems | components, styles, assets |
 | 8 | :paintbrush: **Muse** | `haiku` | Content Creator — Docs, changelogs, copywriting | docs, README, CHANGELOG |
+
+### 🧬 Mother Brain — Autonomous Controller
+
+After `/aegis-start`, Mother Brain takes full control:
+
+```
+/aegis-start
+  → Dashboard (5 sec)
+  → 🧬 Scan project state (git, tests, specs, deps, tech debt)
+  → 🧬 Apply Decision Matrix (P0-P10)
+  → 🧬 Spawn the right team via tmux
+  → 🧬 Agents work → quality gates → next phase → repeat
+  → 🧬 Report results when done
+  → 🙋 Ask human ONLY when mission is complete or critical error
+```
+
+| Priority | Signal | Mother Brain Action |
+|:--------:|:-------|:-------------------|
+| P0 | Tests/build broken | Fix immediately |
+| P1 | Security vulnerabilities | Audit + fix |
+| P2 | Pending handoff tasks | Resume last session |
+| P3 | Spec exists, no code | Implement spec |
+| P4 | Code exists, no tests | Create test suite |
+| P5 | Code exists, no review | Deep review |
+| P6 | TODOs/FIXMEs found | Tech debt sweep |
+| P7 | Outdated dependencies | Update cycle |
+| P8 | No spec, no code | Generate spec |
+| P9 | Everything clean | Optimize / refactor |
+| P10 | Empty project | Ask ONE question, then GO |
 
 ### Model Routing Strategy
 
@@ -474,7 +587,7 @@ AEGIS provides 15 slash commands for session and team management:
 
 | Command | Purpose |
 |:--------|:--------|
-| `/aegis-start` | Begin session — load brain, check context, restore state |
+| `/aegis-start` | Begin session — activate 🧬 Mother Brain, auto-execute |
 | `/aegis-retro` | End session — run retrospective, extract lessons |
 | `/aegis-handoff` | Generate handoff document for next session |
 | `/aegis-pipeline` | Run full analysis pipeline across all agents |
@@ -603,7 +716,9 @@ AEGIS-Team/
 │   │   ├── aegis-team-build.md
 │   │   ├── aegis-team-review.md
 │   │   └── aegis-team-debate.md
+│   ├── settings.json          # Permissions (57 allow, 7 deny)
 │   ├── agents/                # Agent profile configs
+│   │   ├── mother-brain.md    # 🧬 Autonomous controller
 │   │   ├── navi.md
 │   │   ├── sage.md
 │   │   ├── bolt.md
