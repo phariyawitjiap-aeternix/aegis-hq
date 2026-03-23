@@ -166,16 +166,58 @@ tmux kill-server 2>/dev/null; cd ~/AEGIS-Team && git pull && cd ~/my-project && 
 
 > :lock: **Your brain is sacred.** `--upgrade` never touches `_aegis-brain/` or `CLAUDE_lessons.md`. All project memory, learnings, and retrospectives survive across updates. A backup of overwritten files is saved to `_aegis-backup/` before each upgrade.
 
-### :computer: Spawning Agent Teams (aegis-team.sh)
+### :computer: 3 Ways to Spawn Agent Teams
 
-After install, use `aegis-team.sh` to spawn real agent teams in tmux:
+After install, there are **3 ways** to start an AEGIS team:
+
+#### Mode 1: Mother Brain Auto-Spawns (Recommended)
+
+Just run `/aegis-start` — Mother Brain scans, decides, and spawns the right team automatically.
 
 ```bash
-# ┌─────────────────────────────────────────────────────────────┐
-# │  SPAWNING TEAMS — each agent runs its own Claude instance   │
-# │  in a separate tmux pane. Watch them work in real-time.     │
-# └─────────────────────────────────────────────────────────────┘
+# Inside Claude Code:
+> /aegis-start
+#
+# 🧬 Mother Brain: ONLINE
+# 🧬 Scanning project state...
+# 🧬 Decision: P3 — Spec exists, no code
+# 🧬 Spawning build team in tmux...
+#
+# Watch agents: tmux attach -t aegis-team
+```
 
+**Human does nothing.** Mother Brain picks the team, assigns tasks, manages quality gates.
+
+#### Mode 2: Slash Commands (Inside Claude Code)
+
+Use `/aegis-team-*` commands — Claude will auto-execute `aegis-team.sh` and spawn tmux:
+
+```bash
+# Inside Claude Code:
+> /aegis-team-build implement auth system
+# → Claude runs: aegis-team.sh --team build --task "implement auth system"
+# → tmux session opens with 3 agent panes
+
+> /aegis-team-review check src/ directory
+# → Claude runs: aegis-team.sh --team review --task "check src/ directory"
+
+> /aegis-team-debate SQL vs NoSQL
+# → Claude runs: aegis-team.sh --team debate --task "SQL vs NoSQL"
+```
+
+Thai triggers also work:
+
+```bash
+> ทีมสร้าง — เพิ่ม user authentication
+> ทีมรีวิว — ดู src/ ทั้งหมด
+> ถกเถียง — monolith หรือ microservices
+```
+
+#### Mode 3: Terminal Direct (Outside Claude Code)
+
+Run `aegis-team.sh` directly from your terminal:
+
+```bash
 # Build team: Sage specs → Bolt implements → Vigil reviews
 ~/AEGIS-Team/aegis-team.sh --team build --task "Implement auth system"
 
@@ -193,7 +235,13 @@ After install, use `aegis-team.sh` to spawn real agent teams in tmux:
 ~/AEGIS-Team/aegis-team.sh --kill       # Stop all agents
 ```
 
+#### Watching Agents Work
+
+All 3 modes spawn the same tmux session:
+
 ```
+$ tmux attach -t aegis-team
+
 ┌─── tmux: aegis-team ──────────────────────────────────────────────┐
 │ ┌─ 📐 Sage — Architect ────────┐ ┌─ ⚡ Bolt — Implementer ──────┐ │
 │ │ Writing spec...               │ │ Waiting for spec...           │ │
