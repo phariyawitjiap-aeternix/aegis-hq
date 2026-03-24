@@ -15,18 +15,62 @@ Generate all missing or outdated ISO 29110 documents from current project state.
 1. Scan _aegis-output/iso-docs/ for existing documents
 2. Scan _aegis-output/ and _aegis-brain/ for source data
 3. Identify which documents can be generated (source data exists)
-4. Spawn Scribe to generate each missing/outdated document
-5. Update traceability matrix after all documents generated
-6. Report summary: generated, skipped (no source data), already current
+4. Read `_aegis-output/iso-docs/doc-registry.json` (create with empty array if missing)
+5. Read `_aegis-brain/counters.json` (create with counters at 0 if missing)
+6. For each document to generate, follow the **Versioning Protocol**:
+   - **New document** (not in doc-registry):
+     a. Generate `PROJ-DOC-NNN` ID via counter protocol (increment DOC counter)
+     b. Create directory: `_aegis-output/iso-docs/{doc-type-slug}/`
+     c. Write content to `v1.md`
+     d. Copy `v1.md` content to `current.md`
+     e. Create `changelog.md` with initial entry:
+        ```
+        # Changelog: {document title}
+
+        ## v1 (YYYY-MM-DD)
+        - Initial version created
+        - Author: scribe
+        ```
+     f. Add document entry to `doc-registry.json`:
+        ```json
+        {
+          "id": "PROJ-DOC-NNN",
+          "type": "XX.NN",
+          "title": "Document Title",
+          "current_version": 1,
+          "status": "Draft",
+          "author": "scribe",
+          "reviewer": null,
+          "created": "YYYY-MM-DD",
+          "last_updated": "YYYY-MM-DD",
+          "path": "_aegis-output/iso-docs/{doc-type-slug}/"
+        }
+        ```
+   - **Existing document** (found in doc-registry):
+     a. Read current_version from registry entry
+     b. Increment version: `N+1 = current_version + 1`
+     c. Write new content to `v{N+1}.md`
+     d. Overwrite `current.md` with new content
+     e. Append to `changelog.md`:
+        ```
+        ## v{N+1} (YYYY-MM-DD)
+        - {summary of changes from diff with previous version}
+        - Author: scribe
+        ```
+     f. Update registry entry: set `current_version`, `last_updated`, `status`
+7. Update traceability matrix after all documents generated
+8. Report summary: generated (new), updated (versioned), skipped (no source data), already current
 
 ### /aegis-compliance check
 Audit which ISO 29110 documents are missing, outdated, or incomplete.
 
 **Flow**:
 1. Read the full ISO 29110 Basic profile document catalog (PM.01-PM.04, SI.01-SI.07)
-2. Check _aegis-output/iso-docs/ for each required document
-3. For existing documents, check if source data has changed since last generation
-4. Report:
+2. Read `_aegis-output/iso-docs/doc-registry.json` for version and status info
+3. Check _aegis-output/iso-docs/ for each required document
+4. For existing documents, check if source data has changed since last generation
+5. Cross-reference registry entries for version info (current_version, last_updated, status)
+6. Report:
    - Missing documents (required but not generated)
    - Outdated documents (source data newer than document)
    - Current documents (up to date)
@@ -53,6 +97,7 @@ Details:
   [OK]      SI.06 Acceptance Record (v1.0, 2026-03-23)
   [OK]      SI.07 Software Configuration (v1.0, 2026-03-23)
 
+Registry: doc-registry.json has N entries, last updated YYYY-MM-DD
 Action: Run /aegis-compliance generate to fix gaps.
 ```
 
@@ -68,6 +113,77 @@ Show or update the traceability matrix that links requirements to design, code, 
 6. Compute the cross-reference matrix
 7. Write to _aegis-output/iso-docs/traceability-matrix.md
 8. Report gaps (requirements without tests, code without design refs, etc.)
+
+### /aegis-compliance history DOC-TYPE
+Show the changelog for a specific document type.
+
+**Flow**:
+1. Map DOC-TYPE to the document slug (e.g., `PM.01` -> `PM-01-project-plan`)
+2. If DOC-TYPE not recognized, show available document types from doc-registry.json
+3. Read `_aegis-output/iso-docs/{doc-type-slug}/changelog.md`
+4. If changelog does not exist, report "No changelog found for {DOC-TYPE}. Document may not have been generated yet."
+5. Display the full changelog contents
+
+**Output format**:
+```
+Document History: PM.01 -- Project Plan
+=======================================
+Path: _aegis-output/iso-docs/PM-01-project-plan/
+
+# Changelog: Project Plan
+
+## v3 (2026-03-24)
+- Updated timeline after sprint-2 planning
+- Added risk mitigation section
+- Author: scribe
+
+## v2 (2026-03-22)
+- Revised scope after breakdown
+- Reviewed by: vigil
+- Author: scribe
+
+## v1 (2026-03-20)
+- Initial version created from sprint plan
+- Author: scribe
+
+Total versions: 3 | Current: v3
+```
+
+### /aegis-compliance diff DOC-TYPE [v1] [v2]
+Show diff between two versions of a document.
+
+**Flow**:
+1. Map DOC-TYPE to the document slug
+2. If DOC-TYPE not recognized, show available document types from doc-registry.json
+3. Determine version numbers:
+   - If both v1 and v2 provided: compare those specific versions
+   - If only v1 provided: compare v1 with current (latest) version
+   - If neither provided: compare previous version (N-1) with current version (N)
+4. Read `_aegis-output/iso-docs/{doc-type-slug}/v{A}.md` and `v{B}.md`
+5. If either version file does not exist, report error with available versions
+6. Compute line-by-line diff between the two versions
+7. Display diff with additions (+) and removals (-)
+
+**Output format**:
+```
+Document Diff: PM.01 -- Project Plan
+=====================================
+Comparing: v2 -> v3
+
+--- v2 (2026-03-22)
++++ v3 (2026-03-24)
+
+@@ Section 3: Timeline @@
+- Sprint 2: 2026-03-25 to 2026-03-31
++ Sprint 2: 2026-03-26 to 2026-04-02
+
+@@ Section 5: Risks @@
++ ### 5.1 Risk Mitigation
++ - R1: Database migration delay -- Mitigation: parallel dev environment
++ - R2: API rate limiting -- Mitigation: implement caching layer
+
+Summary: 2 sections changed, 4 lines added, 1 line removed
+```
 
 ## Agent Routing
 - **Primary**: Scribe (generates all documents)

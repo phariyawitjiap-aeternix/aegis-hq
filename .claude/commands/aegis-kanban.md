@@ -31,7 +31,9 @@ move tasks, add new ones, and check WIP status.
 **When**: `/aegis-kanban` with no arguments.
 
 1. Read `_aegis-brain/sprints/current/kanban.md`.
-2. If file does not exist, report: `No kanban board found. Run sprint planning first or use /aegis-kanban add to seed the backlog.`
+2. If file does not exist, attempt to regenerate it from `_aegis-brain/tasks/*/meta.json` files
+   that have the current sprint set. If no sprint task data exists either, report:
+   `No kanban board found. Run sprint planning first or use /aegis-kanban add to seed the backlog.`
 3. Display the board using the compact visual format defined in `skills/kanban-board.md`:
 
 ```
@@ -52,16 +54,19 @@ Total: <N> tasks | <pts> points | Done: <pts>/<total> (<pct>%)
 
 ### Subcommand: move TASK-ID COLUMN
 
-**When**: `/aegis-kanban move TASK-003 IN_REVIEW`
+**When**: `/aegis-kanban move PROJ-T-003 IN_REVIEW`
 
-1. Read current board from `_aegis-brain/sprints/current/kanban.md`.
-2. Find `TASK-ID` in the board. If not found, error: `Task TASK-NNN not found on board.`
-3. Validate the transition using the transition rules from `skills/kanban-board.md`:
+1. Read `_aegis-brain/tasks/{TASK-ID}/meta.json`. If not found, also check legacy mapping:
+   treat `TASK-NNN` as `PROJ-T-NNN` and look up `_aegis-brain/tasks/PROJ-T-NNN/meta.json`.
+   If still not found, error: `Task {TASK-ID} not found. No meta.json in _aegis-brain/tasks/`.
+2. Record the current status as `from_status`.
+3. Validate the transition using the transition rules from `skills/kanban-board.md` and
+   `.claude/references/pm-state-protocol.md`:
    - Check the move is an allowed transition (no skipping columns).
-   - Check WIP limits for the target column.
+   - Check WIP limits by reading ALL `meta.json` files in the current sprint (NOT from kanban.md).
 4. If validation fails, report the specific reason:
-   - `[BLOCKED] Cannot move TASK-NNN to IN_PROGRESS: WIP limit reached (3/3)`
-   - `[INVALID] Cannot move TASK-NNN from TODO to QA: skipping columns not allowed`
+   - `[BLOCKED] Cannot move {TASK-ID} to IN_PROGRESS: WIP limit reached (3/3)`
+   - `[INVALID] Cannot move {TASK-ID} from TODO to QA: skipping columns not allowed`
 5. **GATE ENFORCEMENT (mandatory, not advisory):**
    Before moving, check quality gates based on target column:
 
@@ -71,26 +76,29 @@ Total: <N> tasks | <pts> points | Done: <pts>/<total> (<pct>%)
    **→ QA** (from IN_REVIEW):
    - REQUIRE: File exists at `_aegis-output/reviews/` containing review for this task
    - REQUIRE: Review verdict is PASS or CONDITIONAL
-   - If missing/FAIL → BLOCK: `❌ Gate 1 not passed. Run code review first.`
+   - If missing/FAIL → BLOCK: `[BLOCKED] Gate 1 not passed. Run code review first.`
 
    **→ DONE** (from QA):
    - REQUIRE: File exists at `_aegis-output/qa/` with QA report for this task
    - REQUIRE: QA verdict is PASS
-   - If missing/FAIL → BLOCK: `❌ Gate 2 not passed. Run /aegis-qa first.`
+   - If missing/FAIL → BLOCK: `[BLOCKED] Gate 2 not passed. Run /aegis-qa first.`
 
    **BYPASS**: Tasks under 3 story points can skip Gate 1→2 checks (move directly IN_REVIEW→DONE).
 
    **OVERRIDE**: User can type `/aegis-kanban move TASK-NNN DONE --force` to bypass gates (logged as warning).
 
 6. If gates pass and validation passes:
-   - Move the task entry to the target column section.
-   - Update the checkbox: `[ ]` for BACKLOG/TODO, `[~]` for IN_PROGRESS/IN_REVIEW/QA, `[x]` for DONE.
-   - Update `Last updated` timestamp.
-   - Write the file.
+   a. Update `meta.json`: set `status` to the target column and `updated` to the current ISO 8601 timestamp. Write the file.
+   b. Append to `_aegis-brain/tasks/{TASK-ID}/history.md`:
+      ```
+      | {YYYY-MM-DD HH:MM} | navi | MOVED | {from_status} | {to_status} | {optional note} |
+      ```
+   c. Recompute `_aegis-brain/sprints/sprint-N/metrics.json` (see pm-state-protocol.md "Recomputing Sprint Metrics").
+   d. Regenerate `_aegis-brain/sprints/sprint-N/kanban.md` from all sprint meta.json files (see pm-state-protocol.md "Regenerating Kanban Board").
 7. Display the updated board.
-7. Log to `_aegis-brain/logs/activity.log`:
+8. Log to `_aegis-brain/logs/activity.log`:
    ```
-   [YYYY-MM-DD HH:MM] KANBAN_MOVE | task=TASK-NNN | from=<old_col> | to=<new_col>
+   [YYYY-MM-DD HH:MM] KANBAN_MOVE | task={TASK-ID} | from={from_status} | to={to_status}
    ```
 
 ---
@@ -99,22 +107,23 @@ Total: <N> tasks | <pts> points | Done: <pts>/<total> (<pct>%)
 
 **When**: `/aegis-kanban add "Implement auth middleware" 5`
 
-1. Read current board. If no board exists, initialize one (see Board Initialization in `skills/kanban-board.md`).
-2. Determine the next available TASK-ID by scanning for the highest existing ID and incrementing.
-3. Default points to 3 if not specified.
-4. Add the new task to the BACKLOG column:
-   ```
-   - [ ] TASK-NNN: <description> [<pts>pts] @unassigned
-   ```
-5. Update `Last updated` timestamp.
-6. Write the file.
+1. Read `_aegis-brain/counters.json`. If it does not exist, create it (see pm-state-protocol.md).
+2. Increment the `T` counter and write the updated `counters.json` with the current timestamp.
+3. Derive the task ID: `PROJ-T-NNN` (zero-padded to 3 digits).
+4. Default points to 3 if not specified.
+5. Create the task directory and files:
+   - `_aegis-brain/tasks/PROJ-T-NNN/meta.json` — set status: BACKLOG, assignee: unassigned, sprint: null
+   - `_aegis-brain/tasks/PROJ-T-NNN/history.md` — CREATED entry
+   - `_aegis-brain/tasks/PROJ-T-NNN/comments.md` — empty header
+6. If a sprint is currently active and the board exists, regenerate `_aegis-brain/sprints/sprint-N/kanban.md`
+   from meta.json files so the new BACKLOG task appears on the board.
 7. Display confirmation:
    ```
-   Added TASK-NNN: <description> [<pts>pts] to BACKLOG
+   Added PROJ-T-NNN: <description> [<pts>pts] to BACKLOG
    ```
 8. Log to `_aegis-brain/logs/activity.log`:
    ```
-   [YYYY-MM-DD HH:MM] KANBAN_ADD | task=TASK-NNN | points=<pts> | column=BACKLOG
+   [YYYY-MM-DD HH:MM] KANBAN_ADD | task=PROJ-T-NNN | points=<pts> | column=BACKLOG
    ```
 
 ---
@@ -137,9 +146,55 @@ WIP Status:
 
 ---
 
+
+---
+
+### Subcommand: history TASK-ID
+
+**When**: `/aegis-kanban history PROJ-T-003`
+
+1. Read `_aegis-brain/tasks/{TASK-ID}/history.md`. Apply legacy ID mapping if needed (`TASK-NNN` → `PROJ-T-NNN`).
+2. If the file does not exist, error: `No history found for {TASK-ID}. Task directory may not exist.`
+3. Display the full history table:
+
+```
+History: PROJ-T-003
+
+| Timestamp        | Agent    | Action  | From        | To          | Note                          |
+|------------------|----------|---------|-------------|-------------|-------------------------------|
+| 2026-03-24 10:00 | navi     | CREATED | -           | BACKLOG     | Created from breakdown        |
+| 2026-03-25 09:15 | navi     | MOVED   | BACKLOG     | TODO        | Sprint 1 planning             |
+| 2026-03-25 14:00 | navi     | MOVED   | TODO        | IN_PROGRESS | bolt started work             |
+```
+
+No file is written — this is a read-only display.
+
+---
+
+### Subcommand: comment TASK-ID 'text'
+
+**When**: `/aegis-kanban comment PROJ-T-003 'Fixed the null pointer issue in auth.ts'`
+
+1. Validate TASK-ID by checking `_aegis-brain/tasks/{TASK-ID}/meta.json` exists.
+2. Append to `_aegis-brain/tasks/{TASK-ID}/comments.md`:
+   ```
+   ---
+   **{YYYY-MM-DD HH:MM}** | @{current_agent}
+   {comment text}
+
+   ```
+3. Append to `_aegis-brain/tasks/{TASK-ID}/history.md`:
+   ```
+   | {YYYY-MM-DD HH:MM} | {agent} | COMMENT | - | - | "{first 50 chars}" |
+   ```
+4. Display confirmation:
+   ```
+   Comment added to PROJ-T-003
+   ```
+
 ### Error Handling
 
 - **No board file**: Prompt to run sprint planning or use `add` subcommand.
-- **Invalid TASK-ID format**: Report expected format `TASK-NNN`.
+- **Invalid TASK-ID format**: Report expected format `PROJ-T-NNN` (new) or `TASK-NNN` (legacy, auto-mapped).
 - **Invalid COLUMN name**: Report valid columns: `BACKLOG, TODO, IN_PROGRESS, IN_REVIEW, QA, DONE`.
 - **Concurrent write conflict**: If file changed between read and write, re-read and retry once.

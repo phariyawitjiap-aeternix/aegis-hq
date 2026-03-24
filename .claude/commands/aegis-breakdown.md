@@ -34,8 +34,10 @@ Accept the user story text from the command argument.
 
 ### Step 2: Assign Story ID
 
-- Scan `_aegis-output/breakdown/` for existing `US-NNN` directories.
-- Assign the next available `US-NNN` ID (zero-padded to 3 digits).
+- Read `_aegis-brain/counters.json`. If it does not exist, create it (see `.claude/references/pm-state-protocol.md`).
+- Increment the `US` counter and write the updated `counters.json` with the current timestamp.
+- Derive the user story ID: `PROJ-US-NNN` (zero-padded to 3 digits).
+- Continue to also create the legacy `_aegis-output/breakdown/US-NNN/` output path for backward compatibility.
 
 ### Step 3: Spawn Sage for Decomposition
 
@@ -45,16 +47,26 @@ Delegate to the Sage sub-agent with the `work-breakdown` skill loaded:
 Sage, decompose this user story using the work-breakdown skill:
 
 Story: <full user story text>
-ID: US-NNN
+ID: PROJ-US-NNN
 
 Follow the 5-step decomposition process:
 1. Parse the user story
-2. Identify user journeys (J-NNN)
-3. Break journeys into epics (E-NNN)
-4. Break epics into tasks (T-NNN) with types and point estimates
-5. Optionally break tasks >= 5pts into subtasks (ST-NNN)
+2. Identify user journeys (PROJ-J-NNN) — increment J counter in counters.json per journey
+3. Break journeys into epics (PROJ-E-NNN) — increment E counter per epic
+4. Break epics into tasks (PROJ-T-NNN) with types and point estimates — increment T counter per task
+5. Optionally break tasks >= 5pts into subtasks (PROJ-ST-NNN) — increment ST counter per subtask
 
-Write all output to: _aegis-output/breakdown/US-NNN/
+For EACH entity created, after incrementing its counter:
+- Create directory: _aegis-brain/tasks/{ID}/
+- Write meta.json with all required fields (follow .claude/references/pm-state-protocol.md)
+  - parent: set to the direct parent entity's ID
+  - children: populate on the parent's meta.json as each child is created
+  - status: "BACKLOG", assignee: "unassigned", sprint: null
+  - priority: "high" for first-journey tasks, "medium" otherwise
+- Write history.md with the CREATED entry
+- Write empty comments.md with the header block
+
+Write breakdown output to: _aegis-output/breakdown/PROJ-US-NNN/
 Validate against all rules before finalizing.
 ```
 
@@ -62,7 +74,7 @@ Validate against all rules before finalizing.
 
 After Sage completes, verify:
 
-1. Directory `_aegis-output/breakdown/US-NNN/` exists with required files:
+1. Directory `_aegis-output/breakdown/PROJ-US-NNN/` exists with required files:
    - `summary.md` — overview with stats and hierarchy tree
    - `journeys/J-NNN.md` — one file per journey
    - `epics/E-NNN.md` — one file per epic
@@ -80,7 +92,7 @@ If validation fails, report the issues and ask Sage to fix them.
 Show the breakdown summary to the human:
 
 ```
-BREAKDOWN COMPLETE — US-NNN
+BREAKDOWN COMPLETE — PROJ-US-NNN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Story: As a <persona>, I want <action> so that <benefit>
@@ -93,19 +105,19 @@ Total pts: <sum>
 Est sprints: <pts / avg_velocity>
 
 Tree:
-US-NNN: <story>
-├── J-001: <journey>
-│   ├── E-001: <epic> [<pts>pts]
-│   │   ├── T-001: <task> [<pts>pts] @<type>
-│   │   └── T-002: <task> [<pts>pts] @<type>
-│   └── E-002: <epic> [<pts>pts]
-│       └── T-003: <task> [<pts>pts] @<type>
-└── J-002: <journey>
-    └── E-003: <epic> [<pts>pts]
-        └── T-004: <task> [<pts>pts] @<type>
+PROJ-US-NNN: <story>
+├── PROJ-J-001: <journey>
+│   ├── PROJ-E-001: <epic> [<pts>pts]
+│   │   ├── PROJ-T-001: <task> [<pts>pts] @<type>
+│   │   └── PROJ-T-002: <task> [<pts>pts] @<type>
+│   └── PROJ-E-002: <epic> [<pts>pts]
+│       └── PROJ-T-003: <task> [<pts>pts] @<type>
+└── PROJ-J-002: <journey>
+    └── PROJ-E-003: <epic> [<pts>pts]
+        └── PROJ-T-004: <task> [<pts>pts] @<type>
 
-Output: _aegis-output/breakdown/US-NNN/
-Tasks ready for backlog: _aegis-output/breakdown/US-NNN/tasks.md
+Output: _aegis-output/breakdown/PROJ-US-NNN/
+Tasks ready for backlog: _aegis-output/breakdown/PROJ-US-NNN/tasks.md
 
 Next: Run sprint planning to pull tasks into backlog,
       or use /aegis-kanban add to add individual tasks.
@@ -115,13 +127,21 @@ Next: Run sprint planning to pull tasks into backlog,
 
 Append to `_aegis-brain/logs/activity.log`:
 ```
-[YYYY-MM-DD HH:MM] BREAKDOWN | story=US-NNN | journeys=<N> | epics=<N> | tasks=<N> | subtasks=<N> | total_pts=<pts>
+[YYYY-MM-DD HH:MM] BREAKDOWN | story=PROJ-US-NNN | journeys=<N> | epics=<N> | tasks=<N> | subtasks=<N> | total_pts=<pts>
 ```
+
+Verify PM state files were written correctly:
+- `_aegis-brain/counters.json` — reflects final counter values after all entities
+- `_aegis-brain/tasks/PROJ-US-NNN/` — user story meta.json, history.md, comments.md
+- `_aegis-brain/tasks/PROJ-J-NNN/` — one directory per journey
+- `_aegis-brain/tasks/PROJ-E-NNN/` — one directory per epic
+- `_aegis-brain/tasks/PROJ-T-NNN/` — one directory per task
+- `_aegis-brain/tasks/PROJ-ST-NNN/` — one directory per subtask (if any)
 
 ### Error Handling
 
 - **Empty input**: Prompt for a user story or feature description.
 - **Sage unavailable**: Fall back to Navi performing the decomposition directly using the `work-breakdown` skill.
-- **Output directory conflict**: If `US-NNN` already exists, increment to the next available ID.
+- **Output directory conflict**: The counter protocol prevents ID collisions. If a task directory already exists (recovery scenario), increment the counter past the conflicting ID.
 - **Validation failure**: Report specific issues, retry decomposition with corrections.
 - **Very large story (> 100 estimated points)**: Suggest splitting into multiple user stories before breakdown.

@@ -64,19 +64,24 @@ Before any subcommand, detect the current sprint number:
 - Otherwise, new sprint number = `CURRENT_SPRINT + 1`.
 
 #### Step 2: Read Inputs
-- Read `_aegis-brain/backlog.md` for the prioritized product backlog.
-- Read `_aegis-brain/sprints/sprint-<N-1>/close.md` for previous velocity (if exists).
-- Collect any carry-over tasks from the previous sprint's close report.
+- Read `_aegis-brain/tasks/*/meta.json` for all tasks with `status = BACKLOG` and `sprint = null`.
+  These are the candidates for the new sprint. Also read `_aegis-brain/backlog.md` if it exists
+  (for any tasks not yet migrated to meta.json format).
+- Read `_aegis-brain/sprints/sprint-<N-1>/metrics.json` for `velocity_history` (if exists).
+- Collect carry-over tasks: any meta.json with `sprint = null` and a note of "Carried over from sprint-<N-1>"
+  in their history.md.
 
 #### Step 3: Calculate Capacity
-- Read rolling average velocity from the last 5 sprint close reports.
-- If no history exists, use 20 points as default starting capacity.
-- Recommended capacity = rolling average * 0.9 (10% buffer).
+- Read `velocity_history` from `_aegis-brain/sprints/sprint-<N-1>/metrics.json`.
+  If no metrics.json exists, fall back to reading the last 5 `close.md` files.
+- If no history exists at all, use 20 points as default starting capacity.
+- Recommended capacity = rolling average of last 5 velocity_history values * 0.9 (10% buffer).
 
 #### Step 4: Select Stories
-- Read backlog sorted by priority (P0 highest).
-- Carry-over tasks take priority over new backlog items.
-- Select stories from the top until 85-95% of capacity is reached.
+- Sort candidate tasks by priority (critical > high > medium > low). Carry-over tasks
+  (those with a "Carried over" note in history.md) take precedence over fresh backlog items
+  at the same priority level.
+- Select tasks from the top until 85-95% of recommended capacity is reached.
 - Do not exceed 100% capacity.
 
 #### Step 5: Assign to Agents
@@ -94,7 +99,30 @@ Map each task to the appropriate agent by type:
 #### Step 6: Create Sprint Directory and Files
 - Create `_aegis-brain/sprints/sprint-<N>/` and `daily/` subdirectory.
 - Write `plan.md` using the Sprint Plan Template from `skills/sprint-tracker.md`.
-- Write `kanban.md` using the Initial Kanban Template with all tasks in TODO.
+- Write `_aegis-brain/sprints/sprint-<N>/metrics.json` with initial values:
+  - `sprint`: "sprint-<N>"
+  - `started`: current date
+  - `planned_end`: start + sprint duration
+  - `actual_end`: null
+  - `goal`: sprint goal text
+  - `capacity_pts`: recommended capacity
+  - `committed_pts`: sum of selected task points
+  - `completed_pts`: 0
+  - `daily_burndown`: [ { "date": today, "day": 1, "remaining": committed_pts, "completed": 0 } ]
+  - `velocity_history`: copied from previous metrics.json (or empty array)
+  - `tasks`: counts by status (all TODO initially)
+  - `carry_over`: { "count": 0, "points": 0, "task_ids": [] }
+- For each selected task, update `_aegis-brain/tasks/{ID}/meta.json`:
+  - Set `sprint` to `"sprint-<N>"` and `status` to `"TODO"`.
+  - Set `updated` to the current timestamp.
+- For each selected task, append to `_aegis-brain/tasks/{ID}/history.md`:
+  ```
+  | {timestamp} | navi | SPRINT_ASSIGNED | - | sprint-<N> | Sprint <N> planning |
+  | {timestamp} | navi | MOVED | BACKLOG | TODO | Sprint <N> planning |
+  ```
+- Generate `_aegis-brain/sprints/sprint-<N>/kanban.md` by reading all selected tasks'
+  meta.json files and rendering the board view (see pm-state-protocol.md "Regenerating Kanban Board").
+- Update the `current` symlink: `_aegis-brain/sprints/current` → `sprint-<N>/`.
 
 #### Step 7: Log
 Append to `_aegis-brain/logs/activity.log`:
@@ -123,18 +151,23 @@ Sprint <N> Planning Complete
 **When**: Any time during an active sprint. Generates automatically from logs.
 
 #### Step 1: Read Activity Logs
-- Read `_aegis-brain/logs/activity.log` — filter entries from the last 24 hours.
-- Read `_aegis-brain/sprints/sprint-<N>/kanban.md` for current task states.
-- Check for kanban column transitions since the last standup file in `daily/`.
+- Read `_aegis-brain/sprints/sprint-<N>/metrics.json` for sprint summary data.
+- Read all `meta.json` files where `sprint = "sprint-<N>"` for current task states.
+- Read `_aegis-brain/tasks/*/history.md` — collect entries from the last 24 hours
+  (filter rows where timestamp >= 24 hours ago). These replace activity.log as the
+  source of state-change truth.
+- Also read `_aegis-brain/logs/activity.log` filtered to the last 24 hours for
+  any non-task events (reviews, deploys, etc.).
 
 #### Step 2: Identify Blockers
 - Scan log entries for BLOCKED, FAILURE, ERROR, or STALLED markers.
 - Flag tasks in IN_PROGRESS for more than 1 day without a log entry.
 
 #### Step 3: Calculate Burndown
-- Points completed = sum of points in DONE column.
-- Points remaining = sum of points in TODO + IN_PROGRESS + IN_REVIEW + QA.
-- Read sprint duration from `plan.md` to compute ideal remaining.
+- Points completed = sum of `points` from meta.json files with `status = DONE`.
+- Points remaining = sum of `points` from meta.json files with status in TODO, IN_PROGRESS, IN_REVIEW, QA.
+- Read sprint duration from `plan.md` and `metrics.json` to compute ideal remaining.
+- Append a `daily_burndown` entry to `metrics.json` if today's date is not already present.
 - Determine status: ON_TRACK / AT_RISK / OFF_TRACK (see thresholds in skill).
 
 #### Step 4: Write Standup
@@ -238,9 +271,11 @@ Sprint <N> Retrospective
 **When**: Any time during a sprint. Quick burndown check.
 
 #### Step 1: Read Current State
-- Read `kanban.md` for task column counts and point totals.
-- Read `plan.md` for sprint duration and total committed points.
-- Calculate day of sprint and ideal remaining.
+- Read `_aegis-brain/sprints/sprint-<N>/metrics.json` for committed points, completed points,
+  daily_burndown history, and task status counts.
+- Read `plan.md` for sprint duration and goal (metrics.json is the primary source for numeric data).
+- Calculate the current sprint day from `metrics.json.started` and today's date.
+- Calculate ideal remaining from committed_pts and sprint day.
 
 #### Step 2: Display Burndown
 ```
@@ -262,7 +297,7 @@ Sprint <N> Status (Day <D> of <total>)
   Blockers: <count active blockers or "none">
 ```
 
-No file is written for status — it is a read-only display.
+No file is written for status — it is a read-only display. Do NOT write to metrics.json during this subcommand.
 
 ---
 
@@ -271,20 +306,36 @@ No file is written for status — it is a read-only display.
 **When**: After review and retro are complete.
 
 #### Step 1: Calculate Velocity
-- Count total points in DONE column of `kanban.md`. This is the sprint velocity.
+- Read `_aegis-brain/sprints/sprint-<N>/metrics.json` and all `meta.json` files where
+  `sprint = "sprint-<N>"`.
+- Sum `points` of all tasks with `status = DONE`. This is the sprint velocity (`completed_pts`).
 
 #### Step 2: Calculate Rolling Average
-- Read `close.md` from the last 5 sprints (or all available).
-- Rolling average = sum of completed points / number of sprints.
+- Read `velocity_history` from the current `metrics.json`.
+- Append the current sprint's `completed_pts` to `velocity_history`.
+- Keep only the last 5 entries (drop the oldest if length > 5).
+- Rolling average = sum of velocity_history / len(velocity_history).
 - This becomes the recommended capacity for sprint N+1.
 
 #### Step 3: Handle Carry-Over
-- For each task NOT in DONE:
-  - Add it back to `_aegis-brain/backlog.md` at the top of its priority tier.
-  - Mark it with `[carried from sprint-<N>]`.
+- For each task NOT in DONE (read from meta.json where sprint = "sprint-<N>" and status != DONE and status != CANCELLED):
+  - Update `_aegis-brain/tasks/{ID}/meta.json`: set `sprint = null`, `status = "BACKLOG"`, `updated` to now.
+  - Append to `_aegis-brain/tasks/{ID}/history.md`:
+    ```
+    | {timestamp} | navi | MOVED | {current_status} | BACKLOG | Carried over from sprint-<N> |
+    ```
+  - Also add it back to `_aegis-brain/backlog.md` (if that file is still in use) at the top of its
+    priority tier, marked with `[carried from sprint-<N>]`.
+- Populate `carry_over` in `metrics.json`: count, total points, and list of task IDs.
 - Carry-over tasks must not be silently dropped.
 
-#### Step 4: Write Close Report
+#### Step 4: Write Close Report and Finalize Metrics
+- Update `_aegis-brain/sprints/sprint-<N>/metrics.json`:
+  - Set `actual_end` to today's date.
+  - Set `completed_pts` to final velocity.
+  - Update `velocity_history` (last 5 sprints, step 2).
+  - Set final `tasks` counts from meta.json files.
+  - Set `carry_over` object (step 3).
 - Write to `_aegis-brain/sprints/sprint-<N>/close.md` using the Sprint Close
   Template from `skills/sprint-tracker.md`.
 
@@ -292,6 +343,9 @@ No file is written for status — it is a read-only display.
 ```
 [YYYY-MM-DD HH:MM] SPRINT_CLOSE | sprint=<N> | velocity=<pts> | rolling_avg=<pts> | carry_over=<count> tasks
 ```
+
+Also update the `current` symlink to point to the new sprint if one is planned immediately,
+or leave it pointing to the closed sprint until `/aegis-sprint plan` creates the next one.
 
 #### Step 6: Display Summary
 ```
@@ -315,4 +369,5 @@ Sprint <N> Closed
 - **No active sprint** (standup/status/review/retro/close): Report "No active sprint found. Run `/aegis-sprint plan` first."
 - **Sprint already closed** (close): Report "Sprint <N> is already closed."
 - **Missing brain directory**: Create `_aegis-brain/sprints/` and `_aegis-brain/logs/` automatically.
-- **Kanban write conflict**: Only Navi writes to `kanban.md`. Other agents send StatusUpdate messages; Navi performs the column move.
+- **Kanban write conflict**: Only Navi writes to `kanban.md` and `meta.json` files. Other agents send StatusUpdate messages; Navi performs the actual file writes.
+- **Missing metrics.json**: If `metrics.json` is absent, recompute it from all task `meta.json` files in the sprint (see pm-state-protocol.md "Recomputing Sprint Metrics").

@@ -84,7 +84,7 @@ Plan --> Run --> Report --> Gate
 1. Generate test plan (plan)
 2. Execute all test cases (run)
 3. Analyze results and generate report (report)
-4. Issue release gate verdict (gate)
+4. Issue release gate verdict (gate) — includes PM state writes (see gate subcommand above)
 5. Output: all files in `_aegis-output/qa/sprint-N/`
 
 #### `/aegis-qa gate [target]`
@@ -97,6 +97,26 @@ Release gate check — issues a verdict based on existing QA report.
    - **CONDITIONAL** — Minor failures only (P2+), pass rate >= 90%
    - **FAIL** — P0/P1 failures, regressions, or pass rate < 90%
 3. Output verdict with justification
+4. **Record gate result in PM state** (if a TASK-ID is associated with this gate check):
+   - Identify the task ID from the target (e.g. from report metadata or command argument).
+   - Read `_aegis-brain/tasks/{TASK-ID}/meta.json` to confirm task exists.
+   - Determine gate number: Gate 1 if this is a review gate (IN_REVIEW → QA), Gate 2 if QA gate (QA → DONE).
+   - Append to `_aegis-brain/tasks/{TASK-ID}/history.md`:
+     - On PASS or CONDITIONAL:
+       ```
+       | {YYYY-MM-DD HH:MM} | sentinel | GATE_PASS | - | Gate {N} | {one-line summary} |
+       ```
+     - On FAIL:
+       ```
+       | {YYYY-MM-DD HH:MM} | sentinel | GATE_FAIL | - | Gate {N} | {one-line summary} |
+       ```
+   - If verdict is FAIL or CONDITIONAL with findings, append a comment to
+     `_aegis-brain/tasks/{TASK-ID}/comments.md` (use comment format from pm-state-protocol.md)
+     containing the key QA findings summary (max 10 bullet points).
+   - Update task status in `meta.json` based on verdict:
+     - PASS from Gate 2 (QA gate): set `status = "DONE"`, `updated` = now, then regenerate kanban.md.
+     - FAIL from any gate: set `status = "IN_PROGRESS"` (task is returned to developer), `updated` = now.
+     - CONDITIONAL: leave status unchanged; developer and reviewer decide next step.
 
 ### Gate Criteria
 
@@ -150,4 +170,16 @@ _aegis-output/qa/sprint-N/
   raw-results.md    # Probe's raw execution output
   qa-report.md      # Sentinel's analysis and verdict
   coverage/         # Coverage reports (if available)
+```
+
+**PM State Writes** (gate subcommand only, when TASK-ID is known):
+
+```
+_aegis-brain/tasks/{TASK-ID}/
+  history.md        # Appended: GATE_PASS or GATE_FAIL row
+  comments.md       # Appended: QA summary (FAIL/CONDITIONAL only)
+  meta.json         # Updated: status field (PASS → DONE, FAIL → IN_PROGRESS)
+_aegis-brain/sprints/sprint-N/
+  kanban.md         # Regenerated if status changed
+  metrics.json      # Recomputed if status changed
 ```
