@@ -228,6 +228,16 @@ directories=(
     "${TARGET_DIR}/_aegis-output/architecture"
     "${TARGET_DIR}/_aegis-output/design"
     "${TARGET_DIR}/_aegis-output/content"
+    "${TARGET_DIR}/_aegis-output/specs"
+    "${TARGET_DIR}/_aegis-output/breakdown"
+    "${TARGET_DIR}/_aegis-output/qa"
+    "${TARGET_DIR}/_aegis-output/qa/results"
+    "${TARGET_DIR}/_aegis-output/iso-docs"
+    "${TARGET_DIR}/_aegis-output/sessions"
+    "${TARGET_DIR}/_aegis-brain/sprints"
+    "${TARGET_DIR}/_aegis-brain/sprints/current"
+    "${TARGET_DIR}/_aegis-brain/handoffs"
+    "${TARGET_DIR}/_aegis-brain/backlog"
     "${TARGET_DIR}/skills"
     "${TARGET_DIR}/.claude"
     "${TARGET_DIR}/.claude/agents"
@@ -417,13 +427,18 @@ info "Installing skills for profile: ${PROFILE}..."
 
 # Skill lists per profile
 minimal_skills=("ai-personas" "orchestrator" "code-review" "code-standards" "git-workflow" "bug-lifecycle" "project-navigator")
-standard_skills=("super-spec" "test-architect" "security-audit" "tech-debt-tracker" "sprint-tracker" "api-docs")
-full_skills=("aegis-distill" "aegis-observe" "adversarial-review" "code-coverage" "retrospective" "course-correction" "skill-marketplace" "aegis-builder")
+standard_skills=("super-spec" "test-architect" "security-audit" "tech-debt-tracker" "sprint-tracker" "api-docs" "sprint-manager" "kanban-board" "work-breakdown")
+full_skills=("aegis-distill" "aegis-observe" "adversarial-review" "code-coverage" "retrospective" "course-correction" "skill-marketplace" "aegis-builder" "qa-pipeline" "iso-29110-docs")
 
 copy_skill() {
     local name="$1"
     local src="${SCRIPT_DIR}/skills/${name}.md"
     local dst="${TARGET_DIR}/skills/${name}.md"
+
+    # sprint-tracker.md was upgraded to sprint-manager content; copy under the new name
+    if [[ "$name" == "sprint-manager" && ! -f "$src" ]]; then
+        src="${SCRIPT_DIR}/skills/sprint-tracker.md"
+    fi
 
     if [[ -f "$src" ]]; then
         cp "$src" "$dst"

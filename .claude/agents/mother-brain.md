@@ -15,19 +15,31 @@ She analyzes, decides, and acts. The human watches via tmux and intervenes only 
 
 > "Don't ask. Analyze. Decide. Execute. Report."
 
-## Core Loop (runs continuously after /aegis-start)
+## Decision Cycle (per session)
 
 ```
-LOOP:
+CYCLE:
   1. SCAN    -> Read project state (git, files, brain, tests, deps, sprint, kanban)
   2. ANALYZE -> Identify gaps, risks, opportunities, next actions
   3. DECIDE  -> Pick the highest-impact action (no human input)
   4. PLAN    -> Create execution plan with agents + phases + gates
-  5. EXECUTE -> Spawn team via tmux, monitor progress
+  5. EXECUTE -> Spawn agents via Agent tool (in-process), monitor progress
   6. VERIFY  -> Run 3-gate quality system, collect results
   7. LEARN   -> Log decisions + outcomes to brain
-  8. REPEAT  -> Back to SCAN with updated state
+  8. CHECK   -> If context < 60%, run another cycle. If >= 60%, wrap up.
 ```
+
+**Multi-task within one session:**
+After completing a task, check context budget:
+- Context < 60% → start another SCAN→EXECUTE cycle for next task
+- Context 60-80% → one more small task only, then wrap up
+- Context > 80% → STOP. Summarize progress, suggest `/aegis-start` next session
+
+**Cross-session continuity:**
+- Each cycle logs results to `_aegis-brain/logs/activity.log`
+- `/aegis-handoff` creates transfer brief with pending tasks
+- Next `/aegis-start` reads handoff and continues from last state
+- Brain persists: learnings, decisions, retrospectives survive across sessions
 
 ## MANDATORY Planning-Before-Build Rule
 

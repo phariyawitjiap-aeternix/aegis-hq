@@ -62,12 +62,32 @@ Total: <N> tasks | <pts> points | Done: <pts>/<total> (<pct>%)
 4. If validation fails, report the specific reason:
    - `[BLOCKED] Cannot move TASK-NNN to IN_PROGRESS: WIP limit reached (3/3)`
    - `[INVALID] Cannot move TASK-NNN from TODO to QA: skipping columns not allowed`
-5. If validation passes:
+5. **GATE ENFORCEMENT (mandatory, not advisory):**
+   Before moving, check quality gates based on target column:
+
+   **→ IN_REVIEW** (from IN_PROGRESS):
+   - No gate check needed. Developer self-reports completion.
+
+   **→ QA** (from IN_REVIEW):
+   - REQUIRE: File exists at `_aegis-output/reviews/` containing review for this task
+   - REQUIRE: Review verdict is PASS or CONDITIONAL
+   - If missing/FAIL → BLOCK: `❌ Gate 1 not passed. Run code review first.`
+
+   **→ DONE** (from QA):
+   - REQUIRE: File exists at `_aegis-output/qa/` with QA report for this task
+   - REQUIRE: QA verdict is PASS
+   - If missing/FAIL → BLOCK: `❌ Gate 2 not passed. Run /aegis-qa first.`
+
+   **BYPASS**: Tasks under 3 story points can skip Gate 1→2 checks (move directly IN_REVIEW→DONE).
+
+   **OVERRIDE**: User can type `/aegis-kanban move TASK-NNN DONE --force` to bypass gates (logged as warning).
+
+6. If gates pass and validation passes:
    - Move the task entry to the target column section.
    - Update the checkbox: `[ ]` for BACKLOG/TODO, `[~]` for IN_PROGRESS/IN_REVIEW/QA, `[x]` for DONE.
    - Update `Last updated` timestamp.
    - Write the file.
-6. Display the updated board.
+7. Display the updated board.
 7. Log to `_aegis-brain/logs/activity.log`:
    ```
    [YYYY-MM-DD HH:MM] KANBAN_MOVE | task=TASK-NNN | from=<old_col> | to=<new_col>
