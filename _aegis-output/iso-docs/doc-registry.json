@@ -1,5 +1,116 @@
 {
   "project_key": "PROJ",
-  "documents": [],
+  "documents": [
+    {
+      "id": "PM.01",
+      "title": "Project Plan — AEGIS AI Agent Team Framework",
+      "slug": "PM-01-project-plan",
+      "path": "_aegis-output/iso-docs/PM-01-project-plan/current.md",
+      "version": 1,
+      "status": "Approved",
+      "created": "2026-03-24",
+      "author": "Scribe (AEGIS v7.1)"
+    },
+    {
+      "id": "PM.02",
+      "title": "Progress Status Report — AEGIS v7.1",
+      "slug": "PM-02-progress-status",
+      "path": "_aegis-output/iso-docs/PM-02-progress-status/current.md",
+      "version": 1,
+      "status": "Approved",
+      "created": "2026-03-24",
+      "author": "Scribe (AEGIS v7.1)"
+    },
+    {
+      "id": "PM.03",
+      "title": "Change Requests Log — AEGIS v7.1",
+      "slug": "PM-03-change-requests",
+      "path": "_aegis-output/iso-docs/PM-03-change-requests/current.md",
+      "version": 1,
+      "status": "Approved",
+      "created": "2026-03-24",
+      "author": "Scribe (AEGIS v7.1)"
+    },
+    {
+      "id": "PM.04",
+      "title": "Meeting Records — AEGIS Key Decisions",
+      "slug": "PM-04-meeting-records",
+      "path": "_aegis-output/iso-docs/PM-04-meeting-records/current.md",
+      "version": 1,
+      "status": "Approved",
+      "created": "2026-03-24",
+      "author": "Scribe (AEGIS v7.1)"
+    },
+    {
+      "id": "SI.01",
+      "title": "Requirements Specification — AEGIS AI Agent Team Framework",
+      "slug": "SI-01-requirements-spec",
+      "path": "_aegis-output/iso-docs/SI-01-requirements-spec/current.md",
+      "version": 1,
+      "status": "Approved",
+      "created": "2026-03-24",
+      "author": "Scribe (AEGIS v7.1)"
+    },
+    {
+      "id": "SI.02",
+      "title": "Design Document — AEGIS Architecture",
+      "slug": "SI-02-design-doc",
+      "path": "_aegis-output/iso-docs/SI-02-design-doc/current.md",
+      "version": 1,
+      "status": "Approved",
+      "created": "2026-03-24",
+      "author": "Scribe (AEGIS v7.1)"
+    },
+    {
+      "id": "SI.03",
+      "title": "Traceability Matrix — Requirements to Design to Files to Tests",
+      "slug": "SI-03-traceability",
+      "path": "_aegis-output/iso-docs/SI-03-traceability/current.md",
+      "version": 1,
+      "status": "Approved",
+      "created": "2026-03-24",
+      "author": "Scribe (AEGIS v7.1)"
+    },
+    {
+      "id": "SI.04",
+      "title": "Test Plan — AEGIS v7.1",
+      "slug": "SI-04-test-plan",
+      "path": "_aegis-output/iso-docs/SI-04-test-plan/current.md",
+      "version": 1,
+      "status": "Approved",
+      "created": "2026-03-24",
+      "author": "Scribe (AEGIS v7.1)"
+    },
+    {
+      "id": "SI.05",
+      "title": "Test Report — AEGIS v7.1 Session 2026-03-24",
+      "slug": "SI-05-test-report",
+      "path": "_aegis-output/iso-docs/SI-05-test-report/current.md",
+      "version": 1,
+      "status": "Approved",
+      "created": "2026-03-24",
+      "author": "Scribe (AEGIS v7.1)"
+    },
+    {
+      "id": "SI.06",
+      "title": "Acceptance Record — AEGIS Version History",
+      "slug": "SI-06-acceptance",
+      "path": "_aegis-output/iso-docs/SI-06-acceptance/current.md",
+      "version": 1,
+      "status": "Approved",
+      "created": "2026-03-24",
+      "author": "Scribe (AEGIS v7.1)"
+    },
+    {
+      "id": "SI.07",
+      "title": "Configuration Management — AEGIS Version History and Dependencies",
+      "slug": "SI-07-configuration",
+      "path": "_aegis-output/iso-docs/SI-07-configuration/current.md",
+      "version": 1,
+      "status": "Approved",
+      "created": "2026-03-24",
+      "author": "Scribe (AEGIS v7.1)"
+    }
+  ],
   "last_updated": "2026-03-24T00:00:00"
 }
