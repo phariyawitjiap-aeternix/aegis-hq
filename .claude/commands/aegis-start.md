@@ -65,6 +65,12 @@ find . -name '*test*' -o -name '*spec*' -o -name '*.test.*' | head -20
 # Specs
 ls _aegis-output/specs/ 2>/dev/null
 
+# Planning artifacts (MANDATORY check)
+ls _aegis-output/breakdown/ 2>/dev/null
+ls _aegis-brain/sprints/sprint-*/plan.md 2>/dev/null
+ls _aegis-brain/sprints/current/kanban.md 2>/dev/null
+ls _aegis-output/iso-docs/PM-01* 2>/dev/null
+
 # Tech debt
 grep -r 'TODO\|FIXME\|HACK\|XXX' --include='*.swift' --include='*.ts' --include='*.py' --include='*.js' -c 2>/dev/null
 
@@ -75,22 +81,52 @@ ls package.json Gemfile requirements.txt Podfile Package.swift 2>/dev/null
 cat _aegis-brain/logs/activity.log 2>/dev/null | tail -20
 ```
 
-#### 4b. Analyze & Decide
+#### 4b. Check Planning Artifacts (MANDATORY)
+Before ANY build/implementation, verify these exist:
+
+```
+Check 1: Spec?         → ls _aegis-output/specs/*.md
+Check 2: Breakdown?    → ls _aegis-output/breakdown/*/
+Check 3: Sprint?       → ls _aegis-brain/sprints/sprint-*/plan.md
+Check 4: Kanban?       → ls _aegis-brain/sprints/current/kanban.md
+Check 5: ISO PM.01?    → ls _aegis-output/iso-docs/PM-01*.md
+```
+
+If ANY check fails AND the task is P3+ (not a hotfix), create the missing artifacts FIRST:
+- Missing spec → run /super-spec or Sage writes spec
+- Missing breakdown → run /aegis-breakdown from spec
+- Missing sprint → run /aegis-sprint plan from backlog
+- Missing kanban → auto-created by /aegis-sprint plan
+- Missing PM.01 → Scribe generates from sprint plan
+
+**NEVER skip to implementation without planning artifacts.**
+
+#### 4c. Analyze & Decide
 Apply the Decision Matrix (P0-P10):
 
 | Priority | Signal | Action |
 |----------|--------|--------|
-| P0 | Test failures / build broken | Fix immediately |
-| P1 | Security vulnerabilities | Audit + fix |
+| P0 | Test failures / build broken | Fix immediately (hotfix — skip planning) |
+| P1 | Security vulnerabilities | Audit + fix (hotfix — skip planning) |
 | P2 | Pending handoff tasks | Resume from last session |
-| P3 | Spec exists but no code | Implement spec |
-| P4 | Code exists but no tests | Create test suite |
-| P5 | Code exists but no review | Deep review |
+| P2.5 | Active sprint + kanban TODO | Pick next task from kanban board |
+| P3 | Spec + breakdown + sprint all exist | Build next task from kanban |
+| P3.1 | Spec + breakdown exist, NO sprint | /aegis-sprint plan → then build |
+| P3.2 | Spec exists, NO breakdown | /aegis-breakdown → sprint plan → build |
+| P4 | Code exists but no tests | QA: Sentinel + Probe |
+| P5 | Code exists but no review | Review team |
+| P5.5 | QA passed, ISO docs stale | Scribe generates docs |
 | P6 | TODOs/FIXMEs in codebase | Tech debt sweep |
 | P7 | Outdated dependencies | Update cycle |
-| P8 | No spec, no code | Scaffold from identity |
+| P7.5 | Backlog exists, no sprint | /aegis-sprint plan |
+| P8 | No spec exists | /super-spec → /aegis-breakdown → /aegis-sprint plan → build |
 | P9 | Everything clean | Optimize / refactor |
-| P10 | Empty project | Ask project purpose (ONLY exception to no-ask rule) |
+| P10 | Empty project | Ask purpose → /super-spec → breakdown → sprint → build |
+
+**P8 and P10 ALWAYS follow the full planning chain (never skip):**
+```
+Ask/Analyze → /super-spec → /aegis-breakdown → /aegis-sprint plan → build tasks
+```
 
 #### 4c. Announce Decision (not ask)
 

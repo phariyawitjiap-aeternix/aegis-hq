@@ -29,6 +29,25 @@ LOOP:
   8. REPEAT  -> Back to SCAN with updated state
 ```
 
+## MANDATORY Planning-Before-Build Rule
+
+**NEVER skip planning. NEVER jump to implementation without these artifacts:**
+
+```
+BEFORE ANY BUILD/IMPLEMENTATION:
+  ✅ 1. Spec exists        → if not: run /super-spec or Sage generates spec
+  ✅ 2. Breakdown exists    → if not: run /aegis-breakdown from spec
+  ✅ 3. Sprint planned      → if not: run /aegis-sprint plan from backlog
+  ✅ 4. Kanban initialized  → if not: run /aegis-kanban (auto-created by sprint)
+  ✅ 5. ISO PM.01 exists    → if not: Scribe generates Project Plan
+
+ONLY THEN → start building tasks from kanban board
+```
+
+**If user says "build X" or "สร้าง X" or "deploy เลย":**
+Do NOT start coding. First check if artifacts 1-5 exist. If missing, create them.
+This takes 2-5 minutes but prevents chaos, rework, and missing documentation.
+
 ## Decision Matrix -- What To Do Next
 
 Mother Brain scans these signals IN ORDER and picks the first actionable item:
@@ -39,16 +58,29 @@ Mother Brain scans these signals IN ORDER and picks the first actionable item:
 | P1 | Security vulnerabilities | Security audit + fix (Forge + Vigil) |
 | P2 | Pending handoff tasks | Resume from last session |
 | P2.5 | Active sprint with TODO tasks on kanban | Pick next TODO from kanban board |
-| P3 | Spec exists but no implementation | Build team: implement spec |
+| P3 | Spec exists + breakdown exists + sprint active | Build team: implement next task |
+| P3.1 | Spec exists + breakdown exists + NO sprint | Run /aegis-sprint plan first, THEN build |
+| P3.2 | Spec exists + NO breakdown | Run /aegis-breakdown first, THEN sprint plan |
 | P4 | Code exists but no tests | QA team: Sentinel plans + Probe executes |
 | P5 | Code exists but no review | Review team: deep review |
 | P5.5 | QA passed but ISO docs missing/stale | Scribe: generate compliance docs |
 | P6 | TODOs/FIXMEs in codebase | Tech debt sweep |
 | P7 | Outdated dependencies | Dependency update cycle |
 | P7.5 | No active sprint but backlog exists | Sprint planning: /aegis-sprint plan |
-| P8 | No spec exists | Analyze project -> generate spec |
+| P8 | No spec exists | Run /super-spec → then /aegis-breakdown → then /aegis-sprint plan |
 | P9 | Everything clean | Optimization pass / refactor |
-| P10 | Empty project | Full scaffold from project identity |
+| P10 | Empty project | Ask project identity → /super-spec → /aegis-breakdown → /aegis-sprint plan |
+
+**P8 and P10 MUST follow the full chain:**
+```
+/super-spec → /aegis-breakdown → /aegis-sprint plan → /aegis-kanban → THEN build
+     ↓              ↓                    ↓                  ↓
+   BRD+SRS    US→Epic→Task        Sprint backlog      Board ready
+   UX Blueprint  Story points      Capacity plan       WIP limits
+     ↓              ↓                    ↓                  ↓
+   Scribe:     Scribe:            Scribe:             Ready to
+   SI.01       SI.03 trace        PM.01 plan          pick tasks
+```
 
 ## Scan Protocol
 
