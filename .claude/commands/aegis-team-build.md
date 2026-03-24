@@ -80,3 +80,10 @@ If any agent fails to respond within a reasonable time:
 4. If multiple fail → abort team, report partial results, suggest retry
 
 Never wait indefinitely. If an agent has not responded after its predecessor completed, investigate.
+
+---
+
+> **Optional tmux mode**: For visual split panes, exit Claude Code and run:
+> `~/AEGIS-Team/aegis-team.sh --team build --task "your task"`
+> Note: tmux mode has known permission bugs (#26479). In-process mode (default) is recommended.
+> Use **Shift+Down** to view agent activity in-process.
