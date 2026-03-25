@@ -1,4 +1,4 @@
-# AEGIS v7.0 -- Skill Catalog
+# AEGIS v8.0 -- Skill Catalog
 
 > Skills are loaded on-demand based on the active profile. Never load all skills at once.
 
@@ -10,7 +10,7 @@
 |---------|-------------|--------------|----------|
 | minimal | 7 | ~3K tokens | Quick tasks, small projects, limited context |
 | standard | 15 | ~7K tokens | Normal development, team projects |
-| full | 27 | ~14K tokens | Complex analysis, full pipeline, enterprise |
+| full | 28 | ~15K tokens | Complex analysis, full pipeline, enterprise |
 
 ---
 
@@ -127,7 +127,7 @@
 
 ---
 
-## Full Profile (27 skills = standard + 12)
+## Full Profile (28 skills = standard + 13)
 
 ### 16. aegis-distill
 - **Description**: Compress conversation context into essential summaries
@@ -206,7 +206,16 @@
 - **Triggers TH**: "สปรินต์เก่า"
 - **File**: skills/sprint-tracker.md
 
-### 27. aegis-dashboard
+### 27. aegis-deploy
+- **Description**: DevOps deployment pipeline -- build verification, deploy, health check, monitor, rollback. Triggered after Gate 3 PASS on sprint close or release.
+- **Profile**: full
+- **Triggers EN**: "deploy", "release", "rollback", "health check", "devops", "production"
+- **Triggers TH**: "ดีพลอย", "ปล่อย", "โรลแบค", "ตรวจสุขภาพ", "โปรดักชัน"
+- **File**: skills/aegis-deploy.md
+- **Agent**: Ops (#13, sonnet)
+- **Subcommands**: deploy, rollback, health-check, monitor, status
+
+### 28. aegis-dashboard
 - **Description**: Sprint dashboard with ASCII burndown chart, task distribution, agent workload bars, blocked tasks, and recent activity. Read-only computed view from PM state system JSON files.
 - **Profile**: full
 - **Triggers EN**: "dashboard", "status", "overview", "metrics"
