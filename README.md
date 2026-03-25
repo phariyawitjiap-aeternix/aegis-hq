@@ -1,20 +1,22 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/version-6.0-blue?style=for-the-badge" alt="Version 6.0"/>
-  <img src="https://img.shields.io/badge/agents-9_(+Mother_Brain)-green?style=for-the-badge" alt="9 Agents"/>
-  <img src="https://img.shields.io/badge/skills-21-orange?style=for-the-badge" alt="21 Skills"/>
+  <img src="https://img.shields.io/badge/version-8.1-blue?style=for-the-badge" alt="Version 8.1"/>
+  <img src="https://img.shields.io/badge/agents-13_(+Mother_Brain)-green?style=for-the-badge" alt="13 Agents"/>
+  <img src="https://img.shields.io/badge/skills-28-orange?style=for-the-badge" alt="28 Skills"/>
+  <img src="https://img.shields.io/badge/gates-5-red?style=for-the-badge" alt="5 Gates"/>
+  <img src="https://img.shields.io/badge/self--evolving-✓-brightgreen?style=for-the-badge" alt="Self-Evolving"/>
   <img src="https://img.shields.io/badge/license-MIT-purple?style=for-the-badge" alt="MIT License"/>
   <img src="https://img.shields.io/badge/platform-Claude%20Code-black?style=for-the-badge" alt="Claude Code"/>
 </p>
 
-# :shield: AEGIS v6.0 — AI Agent Team Framework for Claude Code
+# :shield: AEGIS v8.1 — AI Agent Team Framework for Claude Code
 
 > **"Context is King, Memory is Soul"**
 >
-> 🧬 Mother Brain · 9 AI Agents · 21 Skills · 15 Commands · Persistent Brain · tmux Agent Teams
+> 🧬 Mother Brain · 13 AI Agents · 28 Skills · 22 Commands · 5-Gate Quality · Self-Evolving Intelligence · ISO 29110
 
 ---
 
-AEGIS (**A**utonomous **E**nhanced **G**roup **I**ntelligence **S**ystem) is a production-grade framework that transforms Claude Code into a coordinated team of 8 specialized AI agents. Each agent carries a distinct role — from architecture to adversarial review — with intelligent model routing across Opus, Sonnet, and Haiku tiers. Blast radius containment ensures agents only touch what they own. Built for real-world SDLC workflows, AEGIS handles everything from sprint planning and code generation to security audits and retrospectives, with a persistent brain that remembers across sessions.
+AEGIS (**A**utonomous **E**nhanced **G**roup **I**ntelligence **S**ystem) is a production-grade framework that transforms Claude Code into a coordinated team of 13 specialized AI agents. Each agent carries a distinct role — from architecture to adversarial review, QA, compliance, and DevOps — with intelligent model routing across Opus, Sonnet, and Haiku tiers. A 5-gate quality pipeline ensures code, product, compliance, deploy, and post-deploy checks pass before release. Self-evolving skills auto-learn from task completion and share intelligence across all agents. Built for real-world SDLC workflows with ISO 29110 compliance, AEGIS handles everything from sprint/scrum/kanban management and code generation to security audits, JIRA-like PM state tracking, and retrospectives, with a persistent brain that remembers across sessions.
 
 ---
 
@@ -644,7 +646,7 @@ Brain accumulated:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    AEGIS v6.0 Architecture                      │
+│                    AEGIS v8.1 Architecture                      │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌─── Layer 6: Skills + Profiles ──────────────────────────┐   │
@@ -684,7 +686,7 @@ Brain accumulated:
 
 ---
 
-## :busts_in_silhouette: The 9 Agents
+## :busts_in_silhouette: The 13 Agents
 
 | # | Agent | Model | Role | Blast Radius |
 |:-:|:------|:-----:|:-----|:-------------|
@@ -697,6 +699,10 @@ Brain accumulated:
 | 6 | :wrench: **Forge** | `haiku` | Scanner/Research — Gathers data, scans repos, metrics | brain/logs, output/scans |
 | 7 | :art: **Pixel** | `sonnet` | UX Designer — UI/UX, accessibility, design systems | components, styles, assets |
 | 8 | :paintbrush: **Muse** | `haiku` | Content Creator — Docs, changelogs, copywriting | docs, README, CHANGELOG |
+| 9 | 🎯 | **Sentinel** | `sonnet` | QA Lead — test strategy, verdict, release gate | _aegis-output/qa/ |
+| 10 | 🔬 | **Probe** | `haiku` | QA Executor — runs tests, reports raw results | _aegis-output/qa/results/ |
+| 11 | 📜 | **Scribe** | `haiku` | Compliance — ISO 29110 docs, traceability matrix | _aegis-output/iso-docs/ |
+| 12 | 🚀 | **Ops** | `sonnet` | DevOps — build, deploy, health check, rollback | deploy/, infra/ |
 
 ### 🧬 Mother Brain — Autonomous Controller
 
@@ -732,8 +738,8 @@ After `/aegis-start`, Mother Brain takes full control:
 | Tier | Agents | Purpose | Cost |
 |:-----|:-------|:--------|:----:|
 | **Opus** | Navi, Sage, Havoc | Strategy, synthesis, deep reasoning | $$$ |
-| **Sonnet** | Bolt, Vigil, Pixel | Implementation, review, design | $$ |
-| **Haiku** | Forge, Muse | Data gathering, content, scanning | $ |
+| **Sonnet** | Bolt, Vigil, Pixel, Sentinel, Ops | Implementation, review, design, QA, DevOps | $$ |
+| **Haiku** | Forge, Muse, Probe, Scribe | Data gathering, content, scanning, compliance | $ |
 
 > **Rule of thumb:** Opus thinks, Sonnet builds, Haiku gathers.
 
@@ -741,7 +747,7 @@ After `/aegis-start`, Mother Brain takes full control:
 
 ## :keyboard: Commands
 
-AEGIS provides 15 slash commands for session and team management:
+AEGIS provides 22 slash commands for session, team, and project management:
 
 | Command | Purpose |
 |:--------|:--------|
@@ -760,6 +766,13 @@ AEGIS provides 15 slash commands for session and team management:
 | `/aegis-team-build` | Spawn **build team** (Bolt + Vigil) via tmux |
 | `/aegis-team-review` | Spawn **review team** (Vigil + Havoc + Forge) via tmux |
 | `/aegis-team-debate` | Spawn **debate team** (Sage + Havoc) via tmux |
+| `/aegis-kanban` | View/manage task board with WIP limits |
+| `/aegis-breakdown` | Decompose user stories into epics, tasks, subtasks |
+| `/aegis-sprint` | Sprint ceremonies — plan, standup, review, retro, close |
+| `/aegis-qa` | QA pipeline — plan, run, report, gate |
+| `/aegis-compliance` | ISO 29110 document management + audit |
+| `/aegis-deploy` | Deploy pipeline — build, deploy, health, monitor |
+| `/aegis-dashboard` | Project dashboard — burndown, metrics, workload |
 
 ---
 
@@ -839,6 +852,38 @@ Skills are scanned at approximately 50 tokens each, loaded fully only when neede
 ### Review Gates
 Mandatory quality checkpoints between pipeline phases. Vigil reviews every change before merge. No auto-approvals.
 
+### 5-Gate Quality Pipeline
+
+```
+Gate 1: Code (Vigil) → Gate 2: Product (Sentinel) → Gate 3: Compliance (Scribe)
+→ Gate 4: Deploy Health (Ops) → Gate 5: Post-Deploy Monitor (Ops)
+```
+
+### 14-Stage SDLC Pipeline
+
+IDEA → BREAKDOWN → SPRINT_PLAN → SPEC → BUILD → REVIEW → QA → COMPLY → DEPLOY → MONITOR → FEEDBACK
+
+### Self-Evolving Intelligence (v8.1)
+
+- **Auto-learn from task completion** — patterns promoted after 3 validations
+- **Shared skill cache** — one agent learns = all agents know
+- **Skill evolution engine** — skills auto-update from real usage data
+- **Token tracking** — measures tokens/story-point, targets -46% reduction
+- **Performance benchmark** — speed, quality, efficiency measured per sprint
+
+### JIRA-like PM State
+
+- **Sequential IDs** (PROJ-T-001)
+- **Per-task history** (meta.json + history.md + comments.md)
+- **Kanban as derived view** from meta.json
+- **Sprint metrics** with real burndown data
+
+### ISO 29110 Compliance
+
+- **14 work products** (PM.1-PM.4, SI.1-SI.6)
+- **Documents generated at activity time** (not batch)
+- **Traceability matrix:** REQ → Design → Code → Test
+
 ### Reflexion Loop
 Agents learn from failures. When something goes wrong, the retrospective captures lessons that feed into future decisions.
 
@@ -852,9 +897,9 @@ Each agent has strict read/write boundaries. Bolt cannot touch CLAUDE.md. Vigil 
 ```
 AEGIS-Team/
 ├── CLAUDE.md                  # Main entry — golden rules, navigation
-├── CLAUDE_agents.md           # 8 agent personas + routing
+├── CLAUDE_agents.md           # 13 agent personas + routing
 ├── CLAUDE_safety.md           # Safety rules for git/file ops
-├── CLAUDE_skills.md           # Skill catalog (21 skills)
+├── CLAUDE_skills.md           # Skill catalog (28 skills)
 ├── CLAUDE_lessons.md          # Accumulated lessons learned
 │
 ├── .claude/
@@ -924,9 +969,18 @@ AEGIS-Team/
 │   ├── resonance/             # Project identity + conventions
 │   ├── learnings/             # Accumulated lessons
 │   ├── logs/                  # Activity logs
-│   └── retrospectives/        # Session retrospectives
+│   ├── retrospectives/        # Session retrospectives
+│   ├── tasks/                 # Per-task state (meta.json, history.md)
+│   ├── sprints/               # Sprint data (plan, metrics, kanban)
+│   ├── skill-cache/           # Shared intelligence patterns
+│   ├── metrics/               # Token usage + benchmarks
+│   └── handoffs/              # Inter-team handoff envelopes
 │
 ├── _aegis-output/             # Agent work products
+│   ├── iso-docs/              # ISO 29110 versioned documents
+│   ├── qa/                    # QA reports and test results
+│   ├── deployments/           # Deploy reports
+│   └── breakdown/             # Work decomposition outputs
 │
 ├── install.sh                 # One-command installer
 └── .gitignore
