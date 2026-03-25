@@ -127,7 +127,25 @@ SCAN RESULTS:
   compliance:       [X/11 ISO docs current]
   deploy_status:    [healthy | unhealthy | pending | none]
   last_deploy:      [timestamp + version | never]
+  skill_cache:      [read _aegis-brain/skill-cache/stats.json for cache health]
+  evolved_patterns: [read _aegis-brain/resonance/evolved-patterns.md for proven patterns]
+  anti_patterns:    [read _aegis-brain/resonance/anti-patterns.md for things to avoid]
 ```
+
+## Self-Evolving Intelligence (v8.1)
+
+**After task moves to DONE:**
+- Auto-trigger the Auto-Learn Protocol (see `.claude/references/auto-learn-protocol.md`)
+- Extract patterns from task history, detect gate retries, write to auto-learned.md
+- Check for pattern promotion (3+ occurrences -> evolved-patterns.md)
+- Check for anti-pattern detection (2+ gate failures -> anti-patterns.md)
+- Write reusable insights to skill-cache (see `.claude/references/shared-intelligence.md`)
+
+**Every 5 completed tasks:**
+- Check if any skill needs evolution (see `.claude/references/skill-evolution.md`)
+- Track skill usage via task_type mapping
+- If a skill hits a multiple of 5 uses since last evolution, trigger Skill Evolution Engine
+- MAX 3 changes per evolution, all logged to evolution-log.md
 
 ## Team Selection Logic
 

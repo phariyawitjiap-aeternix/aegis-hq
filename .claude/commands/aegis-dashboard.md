@@ -42,6 +42,9 @@ Display only the 10 most recent activities across all tasks.
 | Recent activity | `_aegis-brain/tasks/*/history.md` (last 10 entries across all tasks) |
 | Document status | `_aegis-output/iso-docs/doc-registry.json` |
 | ID counters | `_aegis-brain/counters.json` |
+| Token usage | `_aegis-brain/metrics/token-usage.json` |
+| Performance benchmarks | `_aegis-brain/metrics/benchmarks.json` |
+| Learning patterns | `_aegis-brain/learnings/patterns.json` (if exists) |
 
 ---
 
@@ -124,6 +127,24 @@ RECENT ACTIVITY (last 10)
   YYYY-MM-DD HH:MM  PROJ-T-NNN  ACTION  detail  @agent
   ...
 
+TOKEN USAGE
+  This sprint:     NNN K tokens (vs last sprint: NNN K)
+  Tokens/point:    NNN tokens  [trend arrow: up/down/flat]
+  Most expensive agent: @agent (NNN K)
+  Most expensive phase: phase  (NNN K)
+
+PERFORMANCE (vs Sprint-1 baseline)
+  Speed:      +NN% (time/point: NNmin, gate pass: NN%, rework: NN%)
+  Quality:    +NN% (G1 pass: NN%, G2 pass: NN%, criticals: N)
+  Efficiency: +NN% (tokens/pt: NNK, cache hit: NN%)
+  Overall:    N.Nx improvement
+
+LEARNING
+  Cache hit rate:     NN% (hits / total)
+  Evolved patterns:   NN (HIGH confidence)
+  Anti-patterns:      NN detected
+  Skill evolutions:   NN updates
+
 DOCUMENTS (ISO 29110)
   PROJ-DOC-NNN  TYPE  Title         vN  Status
   ...
@@ -161,6 +182,26 @@ AGENT WORKLOAD
   @sage      [================]  2/2 tasks done  ( 5 pts)
   @sentinel  [====------------]  1/4 tasks done  ( 5 pts)
 ```
+
+---
+
+### Step 8: Read Token Usage
+1. Read `_aegis-brain/metrics/token-usage.json` if it exists.
+2. Extract current sprint token data: total_tokens, per_task_avg, per_agent, per_phase.
+3. Compare to previous sprint for trend arrow (up/down/flat).
+4. Identify most expensive agent and phase.
+
+### Step 9: Read Performance Benchmarks
+1. Read `_aegis-brain/metrics/benchmarks.json` if it exists.
+2. Extract current sprint benchmarks: speed, quality, efficiency, learning.
+3. Calculate improvement_over_baseline percentages vs sprint-1.
+4. Compute overall improvement multiplier.
+
+### Step 10: Read Learning Metrics
+1. Read `_aegis-brain/learnings/patterns.json` if it exists.
+2. Count evolved patterns with confidence = HIGH.
+3. Count anti-patterns.
+4. Count skill evolution entries from skill file modification dates.
 
 ---
 

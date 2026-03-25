@@ -100,6 +100,16 @@ Total: <N> tasks | <pts> points | Done: <pts>/<total> (<pct>%)
    ```
    [YYYY-MM-DD HH:MM] KANBAN_MOVE | task={TASK-ID} | from={from_status} | to={to_status}
    ```
+9. **Auto-Learn Trigger** (only when target column is DONE):
+   After successfully moving a task to DONE, trigger the Auto-Learn Protocol
+   (see `.claude/references/auto-learn-protocol.md`):
+   a. Read the task's `history.md` to extract time-per-phase and gate retry counts.
+   b. Map the task to skills used via `meta.json` fields (`task_type`, `labels`).
+   c. Append a new `LEARN-{N}` entry to `_aegis-brain/learnings/auto-learned.md`.
+   d. Check for pattern promotion (3+ similar patterns -> `_aegis-brain/resonance/evolved-patterns.md`).
+   e. Check for anti-pattern detection (2+ similar gate failures -> `_aegis-brain/resonance/anti-patterns.md`).
+   f. If a reusable insight was found, write to `_aegis-brain/skill-cache/{CATEGORY}.md`
+      and update `_aegis-brain/skill-cache/stats.json`.
 
 ---
 

@@ -1,5 +1,6 @@
-# AEGIS v8.0 -- Skill Catalog
+# AEGIS v8.1 -- Skill Catalog
 
+> Self-evolving AI agent framework with performance tracking.
 > Skills are loaded on-demand based on the active profile. Never load all skills at once.
 
 ---

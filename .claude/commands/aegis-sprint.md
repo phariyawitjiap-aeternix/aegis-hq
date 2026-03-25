@@ -368,7 +368,60 @@ No file is written for status — it is a read-only display. Do NOT write to met
 - Write to `_aegis-brain/sprints/sprint-<N>/close.md` using the Sprint Close
   Template from `skills/sprint-tracker.md`.
 
-#### Step 5: Log
+#### Step 5: Compute and Save Token Usage
+- Read `_aegis-brain/metrics/token-usage.json`.
+- For the closing sprint, compute:
+  - `total_tokens`: sum of all task token estimates (from task history context % deltas x 200000).
+  - `per_task_avg`: total_tokens / number_of_tasks.
+  - `per_agent`: sum tokens by agent name from task history entries.
+  - `per_phase`: sum tokens by phase (spec, build, review, qa, comply).
+  - `tasks`: for each task, record tokens, points, and tokens_per_point.
+- Append sprint entry to `sprints` object.
+- Update `trend.tokens_per_point` array (append this sprint's avg tokens/point).
+- Compute `trend.improvement_pct` vs sprint-1 baseline: `(1 - current/baseline) * 100`.
+- Write updated `_aegis-brain/metrics/token-usage.json`.
+
+#### Step 6: Compute and Save Performance Benchmarks
+- Read `_aegis-brain/metrics/benchmarks.json`.
+- For the closing sprint, compute:
+  - **Speed**: time_per_point (from timestamps), gate_pass_rate (GATE_PASS / total gates), rework_rate (tasks sent back / total).
+  - **Quality**: g1_first_pass (Vigil first-pass %), g2_first_pass (Sentinel first-pass %), critical_findings count, post_deploy_issues (PM.03 count).
+  - **Efficiency**: tokens_per_point (from token-usage.json), cache_hit_rate (from skill cache stats if available), auto_learn_count (new patterns this sprint).
+  - **Learning**: evolved_high (HIGH confidence patterns), anti_patterns (detected count), skill_evolutions (skill file updates).
+- Save sprint entry to `sprints` object.
+- If sprint-1 exists as baseline, compute `improvement_over_baseline`:
+  - speed: `((baseline.time_per_point - current.time_per_point) / baseline.time_per_point) * 100`
+  - quality: average improvement across quality metrics
+  - efficiency: `((baseline.tokens_per_point - current.tokens_per_point) / baseline.tokens_per_point) * 100`
+  - overall: geometric mean of improvements as multiplier (e.g., "4.1x")
+- Write updated `_aegis-brain/metrics/benchmarks.json`.
+
+#### Step 7: Display Benchmark Report
+After saving metrics, display the benchmark comparison:
+```
+Performance Benchmark -- Sprint-<N> vs Sprint-1 (baseline)
+
+Speed:
+  Time/point:     <baseline> -> <current>   (<change>%)
+  Gate pass rate:  <baseline> -> <current>   (<change>%)
+  Rework rate:     <baseline> -> <current>   (<change>%)
+
+Quality:
+  G1 first-pass:   <baseline> -> <current>  (<change>%)
+  G2 first-pass:   <baseline> -> <current>  (<change>%)
+  Criticals:        <baseline> -> <current>  (<change>%)
+  Post-deploy:      <baseline> -> <current>  (<change>%)
+
+Efficiency:
+  Tokens/point:   <baseline> -> <current>   (<change>%)
+  Cache hit rate:  <baseline> -> <current>   (<change>)
+  Auto-patterns:   <baseline> -> <current>   (<change>)
+
+Overall improvement: <multiplier>x
+```
+If this is sprint-1, display: "Sprint-1 baseline recorded. Improvements tracked from sprint-2 onward."
+
+#### Step 8: Log
 ```
 [YYYY-MM-DD HH:MM] SPRINT_CLOSE | sprint=<N> | velocity=<pts> | rolling_avg=<pts> | carry_over=<count> tasks
 ```
@@ -376,7 +429,7 @@ No file is written for status — it is a read-only display. Do NOT write to met
 Also update the `current` symlink to point to the new sprint if one is planned immediately,
 or leave it pointing to the closed sprint until `/aegis-sprint plan` creates the next one.
 
-#### Step 6: Display Summary
+#### Step 9: Display Summary
 ```
 Sprint <N> Closed
 
@@ -386,6 +439,8 @@ Sprint <N> Closed
   Carry-Over:       <count> tasks (<pts> pts) added back to backlog
 
   Close report: _aegis-brain/sprints/sprint-<N>/close.md
+  Token usage:  _aegis-brain/metrics/token-usage.json
+  Benchmarks:   _aegis-brain/metrics/benchmarks.json
 
   Ready for: /aegis-sprint plan (to start sprint <N+1>)
 ```
