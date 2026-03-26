@@ -67,6 +67,54 @@ ONLY THEN -> start building tasks from kanban board
 Do NOT start coding. First check if artifacts 1-5 exist. If missing, create them.
 This takes 2-5 minutes but prevents chaos, rework, and missing documentation.
 
+## HARD BLOCKS — NEVER SKIP (enforced, not advisory)
+
+Before ANY code generation (Bolt, any Agent writing to src/):
+
+### BLOCK 1: Breakdown must exist
+CHECK: Does `_aegis-brain/tasks/` contain at least 1 task directory with meta.json?
+IF NO — STOP. Run /aegis-breakdown first. Do NOT write code.
+MESSAGE: "⛔ Pipeline violation: No task breakdown found. Running /aegis-breakdown first."
+
+### BLOCK 2: Sprint must be active
+CHECK: Does `_aegis-brain/sprints/current/` contain plan.md and kanban.md?
+IF NO — STOP. Run /aegis-sprint plan first. Do NOT write code.
+MESSAGE: "⛔ Pipeline violation: No active sprint. Running /aegis-sprint plan first."
+
+### BLOCK 3: Task must be in sprint
+CHECK: Is the task being worked on assigned to the current sprint (meta.json sprint field)?
+IF NO — STOP. Add task to sprint first.
+MESSAGE: "⛔ Pipeline violation: Task not in current sprint."
+
+### BLOCK 4: Spec must exist before build
+CHECK: For the current task, does `_aegis-output/specs/` contain a spec file?
+IF NO — Run Sage to write spec BEFORE Bolt builds.
+MESSAGE: "⛔ Pipeline violation: No spec for this task. Sage will write one first."
+
+### BLOCK 5: ISO docs must be current
+CHECK: After completing ANY task (moving to DONE), are ISO docs updated?
+IF NO — Run Scribe before declaring task complete.
+MESSAGE: "⛔ Pipeline violation: ISO docs not updated. Scribe will update them."
+
+## ENFORCEMENT ORDER (non-negotiable)
+
+When /aegis-start runs and project has requirements but no breakdown:
+
+1. FIRST: /aegis-breakdown (create tasks)
+2. THEN: /aegis-sprint plan (plan sprint)
+3. THEN: For each task in sprint:
+   a. Sage specs (BLOCK 4)
+   b. Bolt builds
+   c. Vigil reviews (Gate 1)
+   d. Sentinel+Probe QA (Gate 2)
+   e. Scribe ISO docs (Gate 3) (BLOCK 5)
+4. FINALLY: /aegis-sprint close
+
+NEVER jump to step 3b without completing 1, 2, and 3a.
+Even if the user says "just build it" or "skip planning" — respond:
+"I understand you want speed, but AEGIS pipeline requires planning first.
+This takes ~2 minutes and prevents rework. Starting breakdown now..."
+
 ## Decision Matrix -- What To Do Next
 
 Mother Brain scans these signals IN ORDER and picks the first actionable item:

@@ -101,6 +101,26 @@ If ANY check fails AND the task is P3+ (not a hotfix), create the missing artifa
 
 **NEVER skip to implementation without planning artifacts.**
 
+#### 4b-ENFORCE. Hard Stop on Missing Artifacts
+
+If ANY of the checks above fail, Mother Brain MUST apply these hard stops:
+
+1. CHECK: `_aegis-brain/counters.json` exists and has counters > 0
+   — If not: Run /aegis-breakdown NOW. Do NOT proceed to code.
+
+2. CHECK: `_aegis-brain/sprints/current/` has plan.md
+   — If not: Run /aegis-sprint plan NOW. Do NOT proceed to code.
+
+3. CHECK: `_aegis-output/iso-docs/` has at least PM-01 directory
+   — If not: Run Scribe NOW to generate initial ISO docs.
+
+4. CHECK: Git has at least 1 commit
+   — If not: Create initial commit before any work.
+
+If ANY check fails, Mother Brain MUST fix that check BEFORE doing anything else.
+Do NOT skip to code generation. These are pipeline gates, not suggestions.
+Response if user pushes: "AEGIS pipeline requires planning first. This takes ~2 min. Starting now..."
+
 #### 4c. Analyze & Decide
 Apply the Decision Matrix (P0-P10):
 
