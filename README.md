@@ -22,21 +22,25 @@ AEGIS (**A**utonomous **E**nhanced **G**roup **I**ntelligence **S**ystem) — pr
 
 ---
 
-## :rocket: Installation
+## :rocket: New Install (one command)
 
 ```bash
-# 1. Prerequisites + Claude Code
 brew install node && npm install -g @anthropic-ai/claude-code
+```
 
-# 2. Clone AEGIS
-git clone https://github.com/phariyawitjiap-aeternix/AEGIS-Team.git ~/AEGIS-Team
+```bash
+cd ~/Documents/my-project && git init
+```
 
-# 3. Install into your project
-mkdir ~/Documents/my-project && cd ~/Documents/my-project && git init && ~/AEGIS-Team/install.sh --profile full --project-name "My Project"
+```bash
+bash <(curl -sL https://raw.githubusercontent.com/phariyawitjiap-aeternix/AEGIS-Team/main/install-remote.sh) --profile full --project-name "My Project"
+```
 
-# 4. Start Claude Code
+```bash
 claude --dangerously-skip-permissions
 ```
+
+> :bulb: Profile options: `minimal` (7 skills) · `standard` (15 skills) · `full` (29 skills)
 
 **Permissions (one-time):**
 
@@ -48,15 +52,33 @@ EOF
 
 ---
 
-## :arrows_counterclockwise: Update Existing Install
+## :arrows_counterclockwise: Upgrade Existing Install
 
 ```bash
-cd ~/AEGIS-Team && git pull origin main
-cd ~/Documents/my-project && ~/AEGIS-Team/install.sh --upgrade
+cd ~/Documents/my-project
+```
+
+```bash
+bash <(curl -sL https://raw.githubusercontent.com/phariyawitjiap-aeternix/AEGIS-Team/main/install-remote.sh) --upgrade
+```
+
+```bash
 claude --dangerously-skip-permissions
 ```
 
-> :lock: `--upgrade` preserves your `_aegis-brain/` and `CLAUDE_lessons.md`. A backup is saved to `_aegis-backup/`.
+**What `--upgrade` does:**
+
+| Step | Action |
+|:----:|--------|
+| 1 | :lock: **Backup** `_aegis-brain/`, `iso-docs/`, `CLAUDE_lessons.md` → `_aegis-backup/` |
+| 2 | :wastebasket: **Remove** old agents, commands, references, teams, skills |
+| 3 | :arrow_down: **Download** latest AEGIS from GitHub (to `/tmp/`, auto-cleaned) |
+| 4 | :package: **Install** new 13 agents, 22 commands, 11 references, 7 teams, 29 skills |
+| 5 | :mag: **Verify** all files present + migrate old versions (v6→v8, v7→v8) |
+
+**:lock: NEVER touched by upgrade:** `_aegis-brain/` (tasks, sprints, patterns, learnings), `iso-docs/`, `CLAUDE_lessons.md`, project source code
+
+> :warning: **Always exit Claude Code before upgrading** — Claude caches files at session start
 
 ---
 
