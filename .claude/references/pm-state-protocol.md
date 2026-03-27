@@ -1,6 +1,6 @@
-# PM State Protocol — Task Lifecycle Rules
+# PM State Protocol — Task Lifecycle, Handoffs, Learning & Intelligence
 
-> Reference for: aegis-breakdown, aegis-kanban, aegis-sprint, aegis-qa
+> Reference for: aegis-breakdown, aegis-kanban, aegis-sprint, aegis-qa, all agents
 > All commands that create or mutate tasks MUST follow this protocol.
 
 ---
@@ -11,25 +11,17 @@
    ```json
    {
      "project_key": "PROJ",
-     "counters": { "US": 0, "J": 0, "E": 0, "T": 0, "ST": 0, "DOC": 0 },
+     "counters": { "US": 0, "J": 0, "E": 0, "T": 0, "ST": 0, "DOC": 0, "HO": 0 },
      "last_updated": "<current ISO 8601 timestamp>"
    }
    ```
-2. Increment the appropriate counter:
-   - User story    → `US`
-   - Journey       → `J`
-   - Epic          → `E`
-   - Task          → `T`
-   - Subtask       → `ST`
-   - Document      → `DOC`
-3. Write the updated `counters.json` with `last_updated` set to the current timestamp.
-4. Derive the ID: `{project_key}-{TYPE}-{NNN}` where NNN is zero-padded to 3 digits.
-   If the counter exceeds 999, extend to 4 digits automatically.
-   Examples: `PROJ-T-001`, `PROJ-E-003`, `PROJ-US-012`, `PROJ-DOC-001`.
+2. Increment the appropriate counter (US/J/E/T/ST/DOC).
+3. Write updated `counters.json` with `last_updated`.
+4. Derive ID: `{project_key}-{TYPE}-{NNN}` (zero-padded 3 digits, extends to 4 if >999).
 5. Create directory: `_aegis-brain/tasks/{ID}/`
 6. Write `meta.json` (see schema below).
-7. Write initial `history.md` with a CREATED entry.
-8. Write empty `comments.md` with the header block.
+7. Write initial `history.md` with CREATED entry.
+8. Write empty `comments.md` with header block.
 
 ---
 
@@ -48,30 +40,20 @@
   "points": 3,
   "priority": "critical|high|medium|low",
   "labels": [],
-  "dependencies": {
-    "blocks": [],
-    "blocked_by": []
-  },
-  "created": "2026-03-24T10:00:00",
-  "updated": "2026-03-24T10:00:00",
+  "dependencies": { "blocks": [], "blocked_by": [] },
+  "created": "ISO 8601",
+  "updated": "ISO 8601",
   "sprint": null,
-  "time_tracking": {
-    "estimated_hours": null,
-    "logged_hours": 0
-  }
+  "time_tracking": { "estimated_hours": null, "logged_hours": 0 }
 }
 ```
 
-**Field notes:**
-- `task_type` is only required when `type` is `task`.
-- `parent` holds the direct parent ID. The full hierarchy is US → J → E → T → ST.
-- `children` is populated on the parent when a child is created (bidirectional link).
-- `points` must be a Fibonacci number: 1, 2, 3, 5, 8, or 13.
-- Tasks created by `/aegis-breakdown` start with `status: "BACKLOG"`, `assignee: "unassigned"`, `sprint: null`.
+- `task_type` required only when `type` is `task`.
+- `points` must be Fibonacci: 1, 2, 3, 5, 8, or 13.
 
 ---
 
-## Valid Status Values and Transitions
+## Valid Status Transitions
 
 ```
 BACKLOG -> TODO -> IN_PROGRESS -> IN_REVIEW -> QA -> DONE
@@ -79,68 +61,25 @@ BACKLOG -> TODO -> IN_PROGRESS -> IN_REVIEW -> QA -> DONE
                        |              v         |
                        +---- REJECTED ----------+
                        |
-                  BLOCKED  (from any active status, requires reason)
+                  BLOCKED  (from any active status)
                   CANCELLED (from any status, terminal)
 ```
-
-| Status       | Description                                 |
-|--------------|---------------------------------------------|
-| BACKLOG      | Created but not yet scheduled               |
-| TODO         | Committed to a sprint, not yet started      |
-| IN_PROGRESS  | Agent actively working                      |
-| IN_REVIEW    | Code review by Vigil                        |
-| QA           | Quality assurance by Sentinel/Probe         |
-| DONE         | Completed and accepted                      |
-| BLOCKED      | Waiting on external dependency              |
-| CANCELLED    | Abandoned (terminal state)                  |
 
 ---
 
 ## Moving a Task (State Transition)
 
 1. Read `_aegis-brain/tasks/{ID}/meta.json`.
-2. Validate the transition against the transition table above.
-3. Check WIP limits by reading all `meta.json` files in the current sprint (do NOT count from kanban.md).
-4. Update `status` and `updated` fields in `meta.json` and write the file.
-5. Append to `_aegis-brain/tasks/{ID}/history.md`:
+2. Validate transition against the table above.
+3. Check WIP limits from all `meta.json` files in current sprint.
+4. Update `status` and `updated` in `meta.json`.
+5. Append to `history.md`:
    ```
-   | {timestamp} | {agent} | MOVED | {from_status} | {to_status} | {optional note} |
+   | {timestamp} | {agent} | MOVED | {from_status} | {to_status} | {note} |
    ```
-6. Recompute `_aegis-brain/sprints/sprint-N/metrics.json` (task counts + daily_burndown).
-7. Regenerate `_aegis-brain/sprints/sprint-N/kanban.md` as a derived view (see Regenerating Kanban Board below).
+6. Recompute `_aegis-brain/sprints/sprint-N/metrics.json`.
+7. Regenerate `_aegis-brain/sprints/sprint-N/kanban.md` (derived view).
 8. Append to `_aegis-brain/logs/activity.log`.
-
----
-
-## Adding a Comment
-
-1. Append to `_aegis-brain/tasks/{ID}/comments.md`:
-   ```
-   ---
-   **{YYYY-MM-DD HH:MM}** | @{agent}
-   {comment text}
-
-   ```
-2. Append to `_aegis-brain/tasks/{ID}/history.md`:
-   ```
-   | {timestamp} | {agent} | COMMENT | - | - | "{first 50 chars of comment}" |
-   ```
-
----
-
-## Recording Gate Results
-
-Append to `_aegis-brain/tasks/{ID}/history.md`:
-```
-| {timestamp} | {agent} | GATE_PASS | - | {gate_number} | {summary} |
-```
-or
-```
-| {timestamp} | {agent} | GATE_FAIL | - | {gate_number} | {summary} |
-```
-
-If the gate produced findings, also append a comment to `_aegis-brain/tasks/{ID}/comments.md`
-with the QA summary text (use the format in "Adding a Comment" above).
 
 ---
 
@@ -148,32 +87,11 @@ with the QA summary text (use the format in "Adding a Comment" above).
 
 ```markdown
 ## {ID} History
-
 | Timestamp | Agent | Action | From | To | Note |
 |-----------|-------|--------|------|----|------|
-| 2026-03-24 10:00 | navi | CREATED | - | BACKLOG | Created from breakdown |
 ```
 
-**Append protocol:** Every write MUST append a new row at the bottom of the table.
-The file is NEVER truncated or rewritten.
-
-**Action types:**
-
-| Action            | Description                                    |
-|-------------------|------------------------------------------------|
-| CREATED           | Entity created                                 |
-| MOVED             | Status changed                                 |
-| ASSIGNED          | Assignee changed                               |
-| COMMENT           | Comment added                                  |
-| POINTS_CHANGED    | Story points modified                          |
-| PRIORITY_CHANGED  | Priority modified                              |
-| DEPENDENCY_ADDED  | Dependency link created                        |
-| DEPENDENCY_REMOVED| Dependency link removed                        |
-| SPRINT_ASSIGNED   | Added to a sprint                              |
-| GATE_PASS         | Quality gate passed (Gate 1 = review, Gate 2 = QA) |
-| GATE_FAIL         | Quality gate failed                            |
-| TIME_LOGGED       | Hours logged                                   |
-| LABEL_CHANGED     | Labels modified                                |
+Action types: CREATED, MOVED, ASSIGNED, COMMENT, POINTS_CHANGED, PRIORITY_CHANGED, DEPENDENCY_ADDED, DEPENDENCY_REMOVED, SPRINT_ASSIGNED, GATE_PASS, GATE_FAIL, TIME_LOGGED, LABEL_CHANGED, HANDOFF
 
 ---
 
@@ -181,56 +99,202 @@ The file is NEVER truncated or rewritten.
 
 ```markdown
 ## {ID} Comments
-
 ---
 **{YYYY-MM-DD HH:MM}** | @{agent}
 {comment text}
-
----
-**{YYYY-MM-DD HH:MM}** | @{agent}
-{comment text}
-
----
 ```
 
-The initial `comments.md` written at creation time contains only the header:
-```markdown
-## {ID} Comments
+---
 
-```
+## Recording Gate Results
+
+Append to history.md: `| {timestamp} | {agent} | GATE_PASS/GATE_FAIL | - | {gate_number} | {summary} |`
+If gate produced findings, also append a comment to comments.md.
 
 ---
 
 ## Regenerating Kanban Board
 
-The file `_aegis-brain/sprints/current/kanban.md` is a DERIVED VIEW, not a source of truth.
-After any state change, regenerate it as follows:
-
-1. Read all `meta.json` files in `_aegis-brain/tasks/` where `sprint` equals the current sprint identifier.
-2. Group tasks by `status` column.
-3. Render as the markdown table format defined in `skills/kanban-board.md`.
-4. Write to `_aegis-brain/sprints/sprint-N/kanban.md`.
-
-If `kanban.md` is lost or corrupted, it can be regenerated at any time from the meta.json files.
+`_aegis-brain/sprints/current/kanban.md` is a DERIVED VIEW. After any state change:
+1. Read all `meta.json` where `sprint` = current sprint.
+2. Group by `status`.
+3. Write to `_aegis-brain/sprints/sprint-N/kanban.md`.
 
 ---
 
 ## Recomputing Sprint Metrics
 
-After any task status change within a sprint, recompute `_aegis-brain/sprints/sprint-N/metrics.json`:
+After any task status change: count by status, sum completed/remaining points, update daily_burndown, write `metrics.json`.
 
-1. Read all `meta.json` files where `sprint` equals the current sprint.
-2. Count tasks by status.
-3. Sum completed points (tasks with `status = DONE`).
-4. Sum remaining points (all non-DONE, non-CANCELLED tasks).
-5. If the current date differs from the last `daily_burndown` entry date, append a new entry.
-6. Write `metrics.json`.
+---
+
+## Handoff Protocol
+
+Every team transition MUST use a HandoffEnvelope to carry context forward.
+
+### HandoffEnvelope Schema
+
+```json
+{
+  "id": "HO-{counter}",
+  "timestamp": "ISO 8601",
+  "from_team": "build|review|qa|compliance|devops",
+  "to_team": "build|review|qa|compliance|devops",
+  "task_id": "PROJ-T-NNN",
+  "status": "READY_FOR_REVIEW|READY_FOR_QA|READY_FOR_COMPLIANCE|READY_FOR_DEPLOY|REJECTED",
+  "artifacts": ["relative/path/to/file"],
+  "gate_results": { "gate_1": "PASS|FAIL|PENDING", "gate_2": "...", "gate_3": "..." },
+  "notes": "summary",
+  "rejection_reason": "required if REJECTED"
+}
+```
+
+### Valid Handoff Routes
+
+```
+BUILD -> REVIEW -> QA -> COMPLIANCE -> DEVOPS -> MONITOR -> BACKLOG
+Any stage can REJECT back to BUILD.
+```
+
+### Gate-to-Handoff Mapping
+
+| Gate | Boundary | Pass Status | Fail Status |
+|------|----------|-------------|-------------|
+| G1 (Code Review) | Build -> QA | READY_FOR_QA | REJECTED |
+| G2 (QA Verdict) | QA -> Compliance | READY_FOR_COMPLIANCE | REJECTED |
+| G3 (Compliance) | Compliance -> DevOps | READY_FOR_DEPLOY | REJECTED |
+| G4 (Deploy Health) | Deploy -> Monitor | (internal) | Rollback + REJECTED |
+| G5 (Post-Deploy) | Monitor -> Stable | Complete | Hotfix to backlog |
+
+### Handoff Storage
+
+`_aegis-brain/handoffs/HO-NNN.json` — counter managed in `counters.json` under `HO` key.
+
+### Creating a Handoff
+
+1. Validate route against routing table.
+2. Collect and verify all artifacts exist.
+3. Evaluate gate if crossing gate boundary.
+4. Write envelope to `_aegis-brain/handoffs/HO-{NNN}.json`.
+5. Update task history.md with HANDOFF action.
+6. Update task status in meta.json.
+7. Notify receiving team.
+
+### Rejection Rules
+
+- `rejection_reason` must be specific enough for Build team to act without reading every artifact.
+- Task status moves back to IN_PROGRESS.
+- Findings appended to task's comments.md.
+
+---
+
+## Auto-Learn Protocol
+
+Automatic knowledge extraction when tasks complete. No human input needed.
+
+### Trigger
+
+When a task's `meta.json` status changes to DONE (after all gates pass).
+
+### Auto-Extract Steps
+
+1. **Pattern Detection**: Read task's `history.md`, extract time per phase, gate retry count, issue finder agent, fix type.
+2. **Skill Match**: Map task to skills via `task_type` and `labels`.
+3. **Auto-Write Learning**: Append to `_aegis-brain/learnings/auto-learned.md`:
+   ```
+   ### LEARN-{counter} | {YYYY-MM-DD} | {task_id}
+   - **Task**: {title} [{points}pts]
+   - **Duration**: {total_time}
+   - **Gate retries**: G1:{n}, G2:{n}, G3:{n}
+   - **Pattern**: {detected_pattern}
+   - **Insight**: {auto-generated insight}
+   - **Action**: {what to do differently}
+   ```
+4. **Pattern Promotion**: Same pattern 3+ times -> promote to `_aegis-brain/resonance/evolved-patterns.md` as PROVEN.
+5. **Anti-Pattern Detection**: Gate fails 2+ times for similar reasons -> add to `_aegis-brain/resonance/anti-patterns.md`.
+
+---
+
+## Shared Intelligence (Skill Cache)
+
+One agent learns -> ALL agents benefit. Location: `_aegis-brain/skill-cache/`
+
+### Write to Cache (after task completion)
+
+Only cache generally applicable insights (not task-specific). Categories:
+
+| Category | File |
+|----------|------|
+| CODE_PATTERN | `_aegis-brain/skill-cache/CODE_PATTERN.md` |
+| REVIEW_PATTERN | `_aegis-brain/skill-cache/REVIEW_PATTERN.md` |
+| TEST_PATTERN | `_aegis-brain/skill-cache/TEST_PATTERN.md` |
+| ARCH_PATTERN | `_aegis-brain/skill-cache/ARCH_PATTERN.md` |
+| SECURITY_PATTERN | `_aegis-brain/skill-cache/SECURITY_PATTERN.md` |
+
+Format: `### SC-{counter} | {date} | Source: {agent} | Task: {task_id}`
+
+### Confidence Escalation
+
+```
+1st occurrence: LOW | 2nd validation: MEDIUM | 3rd validation: HIGH (auto-apply)
+Contradiction (caused issue): DEMOTE by 1 level
+```
+
+### Read from Cache (at task start)
+
+- `impl` -> CODE_PATTERN, ARCH_PATTERN, SECURITY_PATTERN
+- `review` -> REVIEW_PATTERN, SECURITY_PATTERN
+- `test` -> TEST_PATTERN, CODE_PATTERN
+- All tasks -> always read SECURITY_PATTERN
+
+Stats: `_aegis-brain/skill-cache/stats.json` (total_patterns, confidence counts, cache_hits/misses)
+
+---
+
+## Skill Evolution Engine
+
+Skills evolve based on usage data. Triggered every 5 tasks that use a skill.
+
+### Evolution Process
+
+1. Read the skill file.
+2. Read learnings tagged to that skill from `auto-learned.md`.
+3. Read skill-cache patterns and anti-patterns.
+4. Generate update: add new checklist items, remove zero-value steps, reorder by effectiveness, add "Common Pitfalls".
+5. Write updated skill with version bump: `<!-- Evolved: v{N} | {date} | Based on {M} tasks -->`
+
+### Evolution Constraints (HARD LIMITS)
+
+1. NEVER remove safety-critical steps (security, gate validation, error handling).
+2. NEVER change ISO 29110 required outputs.
+3. MAX 3 changes per evolution.
+4. All evolutions logged to `_aegis-brain/skill-cache/evolution-log.md`.
+5. Human can freeze a skill: `<!-- FROZEN: do not evolve -->`
+
+### Skill Usage Mapping
+
+| task_type | Primary skill |
+|-----------|--------------|
+| impl | code patterns | test | qa-pipeline | review | code-review |
+| arch | architecture | ui | frontend | doc | documentation | research | analysis |
+
+---
+
+## Knowledge Pipeline
+
+```
+TASK DONE -> AUTO-EXTRACT -> DISTILL -> PROPAGATE -> ALL AGENTS
+```
+
+1. **Raw Capture** (every task): Write to `_aegis-brain/learnings/raw/YYYY-MM-DD.md`
+2. **Pattern Extraction** (every 3 tasks): Find recurring patterns -> write to skill-cache
+3. **Knowledge Distill** (sprint close): Merge sprint learnings into `_aegis-brain/resonance/`
+4. **Propagation** (session start): Load HIGH cache patterns + evolved/anti patterns into agent prompts
+
+Metrics: `_aegis-brain/metrics/knowledge-pipeline.json`
 
 ---
 
 ## Legacy ID Compatibility
 
-Existing IDs in the format `TASK-NNN` or `US-NNN` (from pre-v7.0 kanban files) are NOT
-retroactively renamed. New entities always use `PROJ-{TYPE}-NNN`. Commands that look up
-a task by ID treat `TASK-NNN` as equivalent to `PROJ-T-NNN` for the purpose of locating
-a task directory.
+Existing IDs `TASK-NNN` or `US-NNN` (pre-v7.0) are NOT renamed. Commands treat `TASK-NNN` as equivalent to `PROJ-T-NNN`.
