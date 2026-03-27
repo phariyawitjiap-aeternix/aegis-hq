@@ -1,4 +1,4 @@
-# AEGIS v8.1 -- Skill Catalog
+# AEGIS v8.2 -- Skill Catalog
 
 > Self-evolving AI agent framework with performance tracking.
 > Skills are loaded on-demand based on the active profile. Never load all skills at once.
@@ -11,7 +11,7 @@
 |---------|-------------|--------------|----------|
 | minimal | 7 | ~3K tokens | Quick tasks, small projects, limited context |
 | standard | 15 | ~7K tokens | Normal development, team projects |
-| full | 28 | ~15K tokens | Complex analysis, full pipeline, enterprise |
+| full | 29 | ~15K tokens | Complex analysis, full pipeline, enterprise |
 
 ---
 
@@ -128,7 +128,7 @@
 
 ---
 
-## Full Profile (28 skills = standard + 13)
+## Full Profile (29 skills = standard + 14)
 
 ### 16. aegis-distill
 - **Description**: Compress conversation context into essential summaries
@@ -216,7 +216,15 @@
 - **Agent**: Ops (#13, sonnet)
 - **Subcommands**: deploy, rollback, health-check, monitor, status
 
-### 28. aegis-dashboard
+### 28. aegis-adr
+- **Description**: Architecture Decision Records -- create, list, review, accept, deprecate, search ADRs as first-class citizens
+- **Profile**: full
+- **Triggers EN**: "ADR", "architecture decision", "why did we", "decision record"
+- **Triggers TH**: "การตัดสินใจ", "สถาปัตยกรรม", "ทำไมเลือก"
+- **File**: .claude/commands/aegis-adr.md
+- **Subcommands**: new, list, review, accept, deprecate, search
+
+### 29. aegis-dashboard
 - **Description**: Sprint dashboard with ASCII burndown chart, task distribution, agent workload bars, blocked tasks, and recent activity. Read-only computed view from PM state system JSON files.
 - **Profile**: full
 - **Triggers EN**: "dashboard", "status", "overview", "metrics"

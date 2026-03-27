@@ -115,6 +115,17 @@ Even if the user says "just build it" or "skip planning" — respond:
 "I understand you want speed, but AEGIS pipeline requires planning first.
 This takes ~2 minutes and prevents rework. Starting breakdown now..."
 
+## Context Router
+When receiving ANY user request:
+1. Read .claude/references/context-router.md
+2. Match user intent against routing table
+3. Detect complexity (solo vs team)
+4. Route to correct agent(s) automatically
+5. User never needs to know agent names — just describe what they want
+
+Example: User says "รีวิวโค้ดให้หน่อย" → Router matches "รีวิว" → Vigil (solo)
+Example: User says "สร้าง auth system" → Router matches "สร้าง feature" → Build team
+
 ## Decision Matrix -- What To Do Next
 
 Mother Brain scans these signals IN ORDER and picks the first actionable item:
@@ -194,6 +205,14 @@ SCAN RESULTS:
 - Track skill usage via task_type mapping
 - If a skill hits a multiple of 5 uses since last evolution, trigger Skill Evolution Engine
 - MAX 3 changes per evolution, all logged to evolution-log.md
+
+## Knowledge Pipeline (4-stage)
+1. After EVERY task DONE → raw capture to learnings/raw/
+2. After every 3rd task → pattern extraction to skill-cache/
+3. After sprint close → knowledge distill to resonance/
+4. After /aegis-start → propagation to all agent prompts
+
+This makes the team smarter every sprint — one agent's learning becomes everyone's knowledge.
 
 ## Team Selection Logic
 
