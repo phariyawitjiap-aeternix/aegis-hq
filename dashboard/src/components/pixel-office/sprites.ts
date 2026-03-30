@@ -434,9 +434,13 @@ export function drawMotherBrainOrb(
   cx: number,
   cy: number,
   hb: HeartbeatStatus | null,
-  tick: number
+  tick: number,
+  hasWork: boolean = false // true if any agent is working/blocked/done
 ): void {
   const health = hb?.health || "unknown";
+
+  // If no work happening, MB is SLEEPING regardless of heartbeat
+  const sleeping = !hasWork && health !== "healthy" && health !== "working";
 
   const colorMap: Record<string, string[]> = {
     healthy: ["#FF00FF", "#FF66FF", "#CC00CC", "#FF88FF"],
@@ -444,15 +448,19 @@ export function drawMotherBrainOrb(
     stale: ["#AAAA00", "#DDDD44", "#888800", "#EEFF22"],
     dead: ["#880000", "#AA2222", "#660000", "#FF2222"],
     unknown: ["#666666", "#888888", "#444444", "#AAAAAA"],
+    sleeping: ["#332244", "#443355", "#221133", "#554466"],
   };
-  const colors = colorMap[health] || colorMap.unknown;
+  const colors = sleeping
+    ? colorMap.sleeping
+    : (colorMap[health] || colorMap.unknown);
 
-  const pulseScale =
-    health === "healthy" || health === "working"
+  const pulseScale = sleeping
+    ? 1 + Math.sin(tick * 0.015) * 0.02 // very slow gentle breathing
+    : health === "healthy" || health === "working"
       ? 1 + Math.sin(tick * 0.1) * 0.07
       : health === "stale"
-      ? 1 + Math.sin(tick * 0.03) * 0.03
-      : 1;
+        ? 1 + Math.sin(tick * 0.03) * 0.03
+        : 1;
 
   const r = 38 * pulseScale;
 
@@ -495,8 +503,10 @@ export function drawMotherBrainOrb(
   ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2);
   ctx.fill();
 
-  // Particle ring (orbit)
-  const particleCount = health === "healthy" || health === "working" ? 12 : health === "stale" ? 6 : 0;
+  // Particle ring (orbit) — sleeping = no particles
+  const particleCount = sleeping ? 0
+    : (health === "healthy" || health === "working") ? 12
+    : health === "stale" ? 6 : 0;
   for (let i = 0; i < particleCount; i++) {
     const angle = tick * 0.025 + (i * Math.PI * 2) / particleCount;
     const orbitR = r + 20;
@@ -509,8 +519,8 @@ export function drawMotherBrainOrb(
     ctx.fill();
   }
 
-  // Second orbit (counter-rotating, smaller)
-  if (health === "healthy" || health === "working") {
+  // Second orbit (counter-rotating, smaller) — not when sleeping
+  if (!sleeping && (health === "healthy" || health === "working")) {
     const innerCount = 6;
     for (let i = 0; i < innerCount; i++) {
       const angle = -(tick * 0.04) + (i * Math.PI * 2) / innerCount;
@@ -525,10 +535,30 @@ export function drawMotherBrainOrb(
   }
 
   // Label
-  ctx.fillStyle = "#FFF";
+  ctx.fillStyle = sleeping ? "#776688" : "#FFF";
   ctx.font = "bold 11px monospace";
   ctx.textAlign = "center";
   ctx.fillText("MOTHER BRAIN", cx, cy + r + 22);
+
+  // Sleeping indicator: floating "Zzz"
+  if (sleeping) {
+    const zFloat = Math.sin(tick * 0.02) * 5;
+    const zAlpha = 0.4 + Math.sin(tick * 0.03) * 0.3;
+    ctx.globalAlpha = zAlpha;
+    ctx.fillStyle = "#9988BB";
+    ctx.font = "bold 14px monospace";
+    ctx.fillText("Z", cx + r + 8, cy - r - 5 + zFloat);
+    ctx.font = "bold 11px monospace";
+    ctx.fillText("z", cx + r + 18, cy - r - 15 + zFloat * 0.7);
+    ctx.font = "bold 8px monospace";
+    ctx.fillText("z", cx + r + 24, cy - r - 22 + zFloat * 0.4);
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = "#776688";
+    ctx.font = "8px monospace";
+    ctx.fillText("sleeping — no work", cx, cy + r + 34);
+  }
+
   ctx.textAlign = "left";
 }
 

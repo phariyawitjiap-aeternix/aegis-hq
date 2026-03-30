@@ -213,7 +213,11 @@ export function PixelOfficeCanvas() {
       drawMeetingRoom(ctx, 490, 390, 260, 190);
 
       // ---- Mother Brain orb ----
-      drawMotherBrainOrb(ctx, ORB_POS.x, ORB_POS.y, hb, tick);
+      // MB sleeps when no agent is working/blocked/done
+      const hasWork = liveAgents.some(a =>
+        a.status === "working" || a.status === "blocked" || a.status === "done"
+      );
+      drawMotherBrainOrb(ctx, ORB_POS.x, ORB_POS.y, hb, tick, hasWork);
 
       // ---- Water cooler ----
       drawWaterCooler(ctx, WATER_COOLER_POS.x - 13, WATER_COOLER_POS.y - 38, tick);
