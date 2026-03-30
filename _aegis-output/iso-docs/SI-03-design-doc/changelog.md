@@ -1,4 +1,4 @@
-# Changelog — SI.02 Design Document
+# Changelog — SI.03 Design Document
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|

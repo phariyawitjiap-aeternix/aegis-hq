@@ -1,6 +1,6 @@
 ---
 document: SI.04
-title: Test Plan — AEGIS v7.1
+title: Test Cases and Procedures — AEGIS v7.1
 version: 1
 status: Approved
 created: 2026-03-24

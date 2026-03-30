@@ -1,6 +1,6 @@
 ---
-document: SI.03
-title: Traceability Matrix — Requirements to Design to Files to Tests
+document: SI.02
+title: Requirements Traceability Matrix — AEGIS (living document)
 version: 1
 status: Approved
 created: 2026-03-24

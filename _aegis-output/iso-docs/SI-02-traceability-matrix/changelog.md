@@ -1,4 +1,4 @@
-# Changelog — SI.03 Traceability Matrix
+# Changelog — SI.02 Requirements Traceability Matrix
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|

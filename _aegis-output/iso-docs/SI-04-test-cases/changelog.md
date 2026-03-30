@@ -1,4 +1,4 @@
-# Changelog — SI.04 Test Plan
+# Changelog — SI.04 Test Cases and Procedures
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|

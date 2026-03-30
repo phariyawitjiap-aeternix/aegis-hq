@@ -1,4 +1,4 @@
-# Changelog — SI.06 Acceptance Record
+# Changelog — PM.06 Acceptance Record
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|

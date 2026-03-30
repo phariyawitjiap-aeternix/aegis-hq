@@ -1,4 +1,4 @@
-# Changelog — SI.07 Configuration Management
+# Changelog — SI.06 Software Configuration (Delivery)
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|

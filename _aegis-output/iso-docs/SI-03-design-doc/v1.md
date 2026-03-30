@@ -1,5 +1,5 @@
 ---
-document: SI.02
+document: SI.03
 title: Design Document — AEGIS Architecture
 version: 1
 status: Approved

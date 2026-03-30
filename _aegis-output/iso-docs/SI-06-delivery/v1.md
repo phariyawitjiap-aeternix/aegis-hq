@@ -1,6 +1,6 @@
 ---
-document: SI.07
-title: Configuration Management — AEGIS Version History and Dependencies
+document: SI.06
+title: Software Configuration (Delivery) — AEGIS Version History and Dependencies
 version: 1
 status: Approved
 created: 2026-03-24

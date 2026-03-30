@@ -56,3 +56,13 @@
 [2026-03-30 20:20] CYCLE_END | cycle=4 | context=~65% | zone=ORANGE | tasks_done=4
 [2026-03-30 20:20] SPRINT_COMPLETE | sprint=sprint-2 | committed=23pts | completed=23pts | velocity=23 | sessions=1 | cycles=4
 [2026-03-30 20:20] DECISION | action=session-wrap | rationale=All sprint-2 tasks DONE, ORANGE zone, writing summary
+[2026-03-30 18:30] SPRINT_START | sprint=3 | capacity=22 | committed=5 | stories=1 | load=23% | FINAL SPRINT
+[2026-03-30 22:00] TASK_START | task=PROJ-T-009 | title="Scribe generates versioned ISO docs automatically" | agent=mother-brain
+[2026-03-30 22:00] ACTION | task=PROJ-T-009 | action=rename-iso-dirs | detail="Aligned 5 ISO doc directories with doc-registry.json slugs (SI-02<->SI-03 swap, SI-04 rename, SI-06/SI-07 remapped to PM-06/SI-06)"
+[2026-03-30 22:00] ACTION | task=PROJ-T-009 | action=fix-frontmatter | detail="Corrected document IDs and titles in current.md, v1.md, and changelog.md for 5 renamed documents"
+[2026-03-30 22:00] ACTION | task=PROJ-T-009 | action=create-pm05 | detail="Created PM-05-correction-register with 3 entries (CR-001 to CR-003), all resolved"
+[2026-03-30 22:00] ACTION | task=PROJ-T-009 | action=update-registry | detail="Updated doc-registry.json: PM.05 status -> Draft, timestamp -> 2026-03-30"
+[2026-03-30 22:00] TASK_DONE | task=PROJ-T-009 | duration=15m | gates=self-review-pass | detail="12/12 ISO docs aligned, versioned, and registered"
+[2026-03-30 22:00] STATUS_CASCADE | entities="PROJ-E-001,E-002,E-003,E-004,J-001,J-002,J-003,J-004,US-001" | new_status=DONE | reason="All child tasks complete"
+[2026-03-30 22:00] SPRINT_COMPLETE | sprint=sprint-3 | committed=5pts | completed=5pts | velocity=5 | sessions=1 | cycles=1 | FINAL_SPRINT
+[2026-03-30 22:00] PROJECT_MILESTONE | milestone="ALL_TASKS_COMPLETE" | total_tasks=13 | total_points=55 | sprints=3 | velocities=[27,23,5] | detail="PROJ-US-001 fully delivered. All 4 journeys, 4 epics, 13 tasks DONE."
