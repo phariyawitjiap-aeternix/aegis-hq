@@ -3,16 +3,16 @@
 # AEGIS v8.2.1 — Remote Installer (one-liner, no clone needed)
 #
 # Usage:
-#   bash <(curl -sL https://raw.githubusercontent.com/phariyawitjiap-aeternix/AEGIS-Team/main/install-remote.sh) --profile full --project-name "My Project"
+#   bash <(curl -sL https://raw.githubusercontent.com/phariyawitjiap-aeternix/aegis-hq/main/install-remote.sh) --profile full --project-name "My Project"
 #
 # Or:
-#   curl -sL https://raw.githubusercontent.com/phariyawitjiap-aeternix/AEGIS-Team/main/install-remote.sh | bash -s -- --profile full --project-name "My Project"
+#   curl -sL https://raw.githubusercontent.com/phariyawitjiap-aeternix/aegis-hq/main/install-remote.sh | bash -s -- --profile full --project-name "My Project"
 # ============================================================================
 
 set -euo pipefail
 
 VERSION="8.2.1"
-REPO_URL="https://github.com/phariyawitjiap-aeternix/AEGIS-Team.git"
+REPO_URL="https://github.com/phariyawitjiap-aeternix/aegis-hq.git"
 TMP_DIR="/tmp/aegis-install-$$"
 TARGET_DIR="$(pwd)"
 PROFILE="standard"

@@ -7,7 +7,7 @@ AEGIS v8.3 — AI Agent Team Framework for Claude Code
 - Language: Markdown (skill/command definitions), Bash (installer)
 - Platform: Claude Code (Anthropic)
 - Features: In-process Agent Teams, Persistent Brain, Mother Brain Heartbeat, Two-Phase Autonomy
-- Repo: https://github.com/phariyawitjiap-aeternix/AEGIS-Team
+- Repo: https://github.com/phariyawitjiap-aeternix/aegis-hq
 
 ## Profile
 full (25 skills — this is the source framework)

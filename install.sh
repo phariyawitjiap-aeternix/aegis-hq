@@ -14,7 +14,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # --------------------------------------------------------------------------
 if [[ ! -f "$SCRIPT_DIR/CLAUDE.md" ]]; then
     echo -e "\033[0;31m[ERROR]\033[0m Cannot find AEGIS source files in $SCRIPT_DIR"
-    echo -e "\033[0;31m[ERROR]\033[0m Make sure you're running install.sh from the AEGIS-Team repo"
+    echo -e "\033[0;31m[ERROR]\033[0m Make sure you're running install.sh from the aegis-hq repo"
     exit 1
 fi
 

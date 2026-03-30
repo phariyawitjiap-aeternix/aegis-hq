@@ -95,9 +95,9 @@ rm -f install.sh aegis-team.sh GETTING_STARTED.md
 
 ## Step 3: INSTALL (copy new files from source)
 
-Copy ALL framework files from AEGIS-Team source:
+Copy ALL framework files from aegis-hq source:
 ```bash
-SOURCE="$HOME/AEGIS-Team"  # or wherever the source repo is
+SOURCE="$HOME/aegis-hq"  # or wherever the source repo is
 
 # Core docs
 cp "$SOURCE/CLAUDE.md" .

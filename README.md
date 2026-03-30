@@ -33,7 +33,7 @@ cd ~/Documents/my-project && git init
 ```
 
 ```bash
-bash <(curl -sL https://raw.githubusercontent.com/phariyawitjiap-aeternix/AEGIS-Team/main/install-remote.sh) --profile full --project-name "My Project"
+bash <(curl -sL https://raw.githubusercontent.com/phariyawitjiap-aeternix/aegis-hq/main/install-remote.sh) --profile full --project-name "My Project"
 ```
 
 ```bash
@@ -59,7 +59,7 @@ cd ~/Documents/my-project
 ```
 
 ```bash
-bash <(curl -sL https://raw.githubusercontent.com/phariyawitjiap-aeternix/AEGIS-Team/main/install-remote.sh) --upgrade
+bash <(curl -sL https://raw.githubusercontent.com/phariyawitjiap-aeternix/aegis-hq/main/install-remote.sh) --upgrade
 ```
 
 ```bash
