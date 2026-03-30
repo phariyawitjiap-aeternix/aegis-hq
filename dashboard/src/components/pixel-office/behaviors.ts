@@ -1,8 +1,8 @@
 // ---- Agent Behavior System v2 ----
 // Data-driven behaviors from real API state + natural social interactions.
+// See BEHAVIOR_RULES.md for the complete rule set.
 //
-// WORK behaviors: respond to actual task assignments, pipeline flow, team commands
-// SOCIAL behaviors: idle agents chat, get coffee, rest — like a real office
+// Golden Rule: API says work → work. API says idle → live your life. No fake work.
 
 import type { PixelAgent, SpeechBubble } from "./types";
 import type { AgentState } from "@/types";
