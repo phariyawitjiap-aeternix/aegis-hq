@@ -2,23 +2,129 @@
   <img src="https://img.shields.io/badge/version-8.3-blue?style=for-the-badge" alt="Version 8.3"/>
   <img src="https://img.shields.io/badge/agents-13-green?style=for-the-badge" alt="13 Agents"/>
   <img src="https://img.shields.io/badge/skills-25-orange?style=for-the-badge" alt="25 Skills"/>
-  <img src="https://img.shields.io/badge/commands-23-yellow?style=for-the-badge" alt="23 Commands"/>
+  <img src="https://img.shields.io/badge/commands-24-yellow?style=for-the-badge" alt="24 Commands"/>
   <img src="https://img.shields.io/badge/gates-5-red?style=for-the-badge" alt="5 Gates"/>
+  <img src="https://img.shields.io/badge/dashboard-pixel--office-ff69b4?style=for-the-badge" alt="Pixel Office"/>
   <img src="https://img.shields.io/badge/ISO--29110-compliant-brightgreen?style=for-the-badge" alt="ISO 29110"/>
   <img src="https://img.shields.io/badge/license-MIT-purple?style=for-the-badge" alt="MIT License"/>
 </p>
 
-# :shield: AEGIS v8.3 — AI Agent Team Framework for Claude Code
+<h1 align="center">:shield: AEGIS HQ v8.3</h1>
+<h3 align="center">AI Agent Team Framework for Claude Code</h3>
 
-> **"Context is King, Memory is Soul"**
->
-> :dna: Mother Brain · 13 AI Agents · 25 Skills · 23 Commands · 5-Gate Quality · Self-Evolving Intelligence
+<p align="center">
+  <b>"Context is King, Memory is Soul"</b><br/>
+  <sub>:dna: Mother Brain · 13 AI Agents · 25 Skills · 24 Commands · 5-Gate Quality · Dashboard + Pixel Office</sub>
+</p>
 
 ---
 
-## What is AEGIS?
+## :zap: 30-Second Demo
 
-AEGIS (**A**utonomous **E**nhanced **G**roup **I**ntelligence **S**ystem) — production-grade AI agent team framework for Claude Code. 13 agents, 14-stage SDLC pipeline, 5-gate quality, ISO 29110 compliance, JIRA-like PM, self-evolving intelligence. :dna: ยิ่งใช้ยิ่งเก่ง.
+```
+$ bash <(curl -sL .../install-remote.sh) --profile full --project-name "My SaaS App"
+
+================================================
+  AEGIS v8.3 — Remote Installer
+================================================
+
+[INFO] Profile: full
+[INFO] Target:  ~/Documents/my-project
+
+[OK] git found
+[OK] node found: v22.x
+[OK] claude found: 2.x (Claude Code)
+[OK] Downloaded AEGIS v8.3
+[OK] 13 agents installed
+[OK] 24 commands installed
+[OK] 11 references installed
+[OK] 25 skills installed (profile: full)
+[OK] Directory structure created
+[OK] counters.json initialized
+
+================================================
+  AEGIS v8.3 — Installation Complete!
+================================================
+
+Next:
+  claude --dangerously-skip-permissions
+  > /aegis-start
+```
+
+```
+$ claude
+> /aegis-start
+
+🛡️ ═══════════════════════════════════════════════════
+🛡️  AEGIS v8.3 — Session Started
+🛡️  "Context is King, Memory is Soul"
+🛡️ ═══════════════════════════════════════════════════
+
+📋 Project:    My SaaS App
+🎚️  Profile:    full (25 skills)
+🔐 Autonomy:   L3 — Autonomous (Mother Brain active)
+
+🧬 Mother Brain: ONLINE — persistent heartbeat active
+
+💓 Heartbeat: Scanning project state...
+   Mother Brain will continuously monitor and dispatch agents.
+
+🧬 Mother Brain: Scan complete.
+
+📊 Scan Results:
+  ├── Git: clean (main)
+  ├── Sprint: sprint-1 active
+  ├── Kanban: 3 TODO, 1 WIP, 2 DONE
+  └── Context: 8% used
+
+🎯 Decision: P2.5 — Pick next TODO from kanban
+   → 📐 Sage: Writing spec...
+   → ⚡ Bolt: Waiting for spec...
+   → 🛡️ Vigil: Waiting for code review...
+```
+
+```
+$ cd dashboard && npm install && npm run dev
+# Open http://localhost:4321
+
+🎮 Pixel Office — 13 agents in a pixel-art office
+   Agents walk around, chat, get coffee when idle
+   When work arrives: they sit down, code, and report to Mother Brain
+
+┌────────────────────────────────────────────────────────────┐
+│ SPRINT-2 Kanban  ████████████░░░ 70%  19/27pts            │
+│ TODO    WIP     DONE                                       │
+│ ┌────┐ ┌────┐  ┌────┐┌────┐┌────┐                        │
+│ │T-12│ │T-08│  │✓T05││✓T06││✓T07│                        │
+│ └────┘ └────┘  └────┘└────┘└────┘                        │
+│                                                            │
+│  📐Sage  ⚡Bolt  🛡️Vigil  🔴Havoc  🔧Forge               │
+│  [desk]  [typing] [desk]  [coffee] [walking]              │
+│                                                            │
+│  🧬 Mother Brain: sleeping — no work  Zzz                 │
+└────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## What is AEGIS HQ?
+
+**AEGIS** (**A**utonomous **E**nhanced **G**roup **I**ntelligence **S**ystem) — production-grade AI agent team framework for Claude Code.
+
+One command installs **13 AI agents** that autonomously plan, code, review, test, and deploy your project. Mother Brain scans your repo, decides what to do, spawns the right team, and drives to completion — while you watch from the **Pixel Office dashboard**.
+
+:dna: **ยิ่งใช้ยิ่งเก่ง** — self-evolving intelligence learns from every sprint.
+
+### Why AEGIS HQ?
+
+| Without AEGIS | With AEGIS HQ |
+|:-------------|:-------------|
+| You tell Claude what to do | Mother Brain decides + acts |
+| One agent at a time | 13 agents in parallel |
+| No memory between sessions | Persistent brain + handoff |
+| No quality gates | 5-gate pipeline (code → QA → ISO → deploy → monitor) |
+| No project management | JIRA-like sprints + kanban + velocity |
+| Invisible agent work | **Pixel Office** — watch agents work in real-time |
 
 ---
 
@@ -73,7 +179,7 @@ claude --dangerously-skip-permissions
 | 1 | :lock: **Backup** `_aegis-brain/`, `iso-docs/`, `CLAUDE_lessons.md` → `_aegis-backup/` |
 | 2 | :wastebasket: **Remove** old agents, commands, references, teams, skills |
 | 3 | :arrow_down: **Download** latest AEGIS from GitHub (to `/tmp/`, auto-cleaned) |
-| 4 | :package: **Install** new 13 agents, 23 commands, 11 references, 7 teams, 25 skills |
+| 4 | :package: **Install** new 13 agents, 24 commands, 11 references, 6 teams, 25 skills |
 | 5 | :mag: **Verify** all files present + migrate old versions (v6→v8, v7→v8) |
 
 **:lock: NEVER touched by upgrade:** `_aegis-brain/` (tasks, sprints, patterns, learnings), `iso-docs/`, `CLAUDE_lessons.md`, project source code
